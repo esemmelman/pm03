@@ -1,0 +1,21 @@
+// Optional DOM smoke check: SOLO_JSDOM points to a jsdom installation.
+const {JSDOM}=require(process.env.SOLO_JSDOM||'jsdom');
+const fs=require('node:fs');
+const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'http://localhost',runScripts:'outside-only'}),w=dom.window;
+w.HTMLDialogElement.prototype.showModal=function(){this.open=true};
+w.HTMLDialogElement.prototype.close=function(){this.open=false};
+w.eval(fs.readFileSync('app.js','utf8'));
+const $=s=>w.document.querySelector(s),assert=(ok,msg)=>{if(!ok)throw Error(msg)};
+assert(w.document.querySelectorAll('.task').length===5,'seed Today view');
+$('#quick').value='QA capture';$('#quickForm').dispatchEvent(new w.Event('submit',{cancelable:true}));
+assert(w.document.querySelectorAll('.task').length===6,'capture');
+$('.task-name').click();$('#taskName').value='Updated title';$('#taskForm').dispatchEvent(new w.Event('submit',{cancelable:true}));
+assert(w.document.body.textContent.includes('Updated title'),'edit');$('.check').click();
+assert(JSON.parse(w.localStorage.getItem('solo-desk-v1')).tasks.find(t=>t.title==='Updated title').done,'completion persisted');
+$('#search').value='QA capture';$('#search').dispatchEvent(new w.Event('input'));
+assert(w.document.querySelectorAll('.task').length===1,'search');$('#boardView').click();
+assert(w.document.querySelectorAll('.board-column').length===2,'board');$('#startTimer').click();
+assert($('#startTimer').textContent.includes('Pause'),'timer start');$('#startTimer').click();
+assert($('#startTimer').textContent.includes('Resume'),'timer pause');$('#resetTimer').click();
+assert($('#timer').textContent==='25:00','timer reset');dom.window.close();
+console.log('PASS: rendering, capture, edit, completion, persistence, search, board and timer controls');
