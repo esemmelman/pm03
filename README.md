@@ -13,3 +13,5 @@ Choose **Carnival tutorial** in the header for an eight-step walkthrough of a fi
 Reading text is enlarged throughout: task titles and notes are 17px, with supporting task labels at 14px and tutorial body text at 17px (16px on phones).
 
 Projects appear at the top of the sidebar, including on mobile. Select a project, then use **Tasks** / **Project notes** above the content to switch sections. Notes save while typing. Left/right arrows switch tabs when the tab bar has focus. Global task views show tasks directly. The workspace summary cards and Solo sidebar label have been removed.
+
+Select a project and choose **Edit project** beside its title to change its name and notes. **Delete project** opens a confirmation: by default its tasks are kept as Unassigned with their current planning buckets and completion status. Check **Also delete this project’s tasks** to remove them, including completed tasks. Project notes are removed on deletion; export first to retain a backup. Logged focus time is kept as Unassigned. Use the + beside Projects to create a new project in the same editor.
