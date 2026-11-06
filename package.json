@@ -1,0 +1,1 @@
+{"name":"solo-desk","private":true,"scripts":{"build":"node build.mjs","check":"node --check app.js","start":"node server.mjs"}}
