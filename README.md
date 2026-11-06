@@ -7,3 +7,7 @@ Run `npm start` and open http://127.0.0.1:4173. Run `npm run check` and `npm run
 Data is stored in this browser's localStorage. Each browser and site origin has a separate workspace; export backups regularly and use import to move devices. Clearing browser data removes the workspace. First launch includes example tasks. Fonts have system fallbacks. Notes are plain text/Markdown source; they are not rendered as HTML. There is no account, sync, backend, Gantt view, subtasks, or recurrence engine in this first version.
 
 Shortcuts: N creates a task; / searches; Escape closes the task editor. Click a task title to edit or delete it. Focus sessions log 25 minutes when the timer finishes while the app is open; paused or reset sessions are not logged.
+
+Choose **Carnival tutorial** in the header for an eight-step walkthrough of a fictional school carnival. **Add carnival example** adds one project and fourteen editable tasks without replacing current work; repeated clicks reopen the same example. It includes planning milestones, an illustrative budget, volunteer and supply tasks, event-day operations and a wrap-up. Step completion is self-reported and saved with workspace backups. Tutorial tasks use relative milestones in notes; planning buckets do not schedule dates automatically.
+
+Reading text is enlarged throughout: task titles and notes are 17px, with supporting task labels at 14px and tutorial body text at 17px (16px on phones).
