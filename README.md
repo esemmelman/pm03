@@ -11,3 +11,5 @@ Shortcuts: N creates a task; / searches; Escape closes the task editor. Click a 
 Choose **Carnival tutorial** in the header for an eight-step walkthrough of a fictional school carnival. **Add carnival example** adds one project and fourteen editable tasks without replacing current work; repeated clicks reopen the same example. It includes planning milestones, an illustrative budget, volunteer and supply tasks, event-day operations and a wrap-up. Step completion is self-reported and saved with workspace backups. Tutorial tasks use relative milestones in notes; planning buckets do not schedule dates automatically.
 
 Reading text is enlarged throughout: task titles and notes are 17px, with supporting task labels at 14px and tutorial body text at 17px (16px on phones).
+
+Projects appear at the top of the sidebar, including on mobile. Select a project, then use **Tasks** / **Project notes** above the content to switch sections. Notes save while typing. Left/right arrows switch tabs when the tab bar has focus. Global task views show tasks directly. The workspace summary cards and Solo sidebar label have been removed.

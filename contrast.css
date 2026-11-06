@@ -29,3 +29,13 @@ dialog{background:#fff;color:#101a30;border:2px solid #101a30;box-shadow:0 20px 
 .lesson-meta,.lesson p,.lesson li{color:#26324b}.lesson-tip{background:#fff5b8;color:#3d3516;border-left-color:#9b7a00}.lesson-check,.lesson-footer{color:#26324b}.lesson-check input{accent-color:#143ec7}.lesson-footer{border-color:#68748b}
 #insights{background:#fff;border:2px solid #101a30}.bar{background:#143ec7}footer{color:#35415b}footer i{background:#143ec7}#toast{background:#101a30;color:#fff;border:2px solid #ffe34d}
 button:hover{filter:none}input,select,textarea{outline-color:#143ec7}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #143ec7;outline-offset:3px}aside button:focus-visible,aside a:focus-visible,.focus-card button:focus-visible{outline-color:#ffe34d}
+/* Projects lead the sidebar; project content switches in place. */
+aside>.project-head{margin-top:0;padding:0 10px;margin-bottom:6px;font-size:17px;letter-spacing:1px}
+aside>.workspace{margin-top:24px;padding:16px 10px 0;border-top:1px solid #68748b}
+.section-tabs{display:flex;gap:0;border-bottom:2px solid #101a30;margin:0 0 16px}
+.section-tabs button{font-size:17px;padding:11px 22px;background:#fff;color:#101a30;border:2px solid #101a30;border-bottom:0;border-radius:7px 7px 0 0;margin-right:7px}
+.section-tabs button[aria-selected="true"]{background:#143ec7;color:#fff;border-color:#143ec7}
+.section-tabs button:hover{background:#dce6ff;color:#101a30}.section-tabs button[aria-selected="true"]:hover{background:#143ec7;color:#fff}
+.notes-wide{margin-top:0}.notes-wide textarea{min-height:55vh}
+[hidden]{display:none!important}
+@media(max-width:580px){aside>.project-head{display:flex}aside>#projects{display:flex;gap:7px;overflow:auto;padding-bottom:4px}#projects .project-item{width:auto;min-width:150px;max-width:240px;margin:0;flex-shrink:0;border:1px solid #68748b;font-size:15px}aside>.workspace{display:block;margin-top:12px;padding-top:10px;font-size:13px}aside>nav{margin-top:5px}.section-tabs button{font-size:16px;padding:10px 15px}.notes-wide textarea{min-height:50vh}}
