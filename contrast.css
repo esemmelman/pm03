@@ -59,3 +59,10 @@ aside>#taskViewsToggle{color:#fff;width:100%;margin-top:20px;margin-bottom:4px;p
 .tool-toggle{width:100%;padding:12px 14px;background:#fff;color:#101a30;border:1px solid #68748b;border-radius:6px;font-weight:600}
 .collapsible-tool{min-width:0}.collapsible-tool>section{margin-top:8px}
 @media(max-width:580px){aside>#taskViewsToggle{display:flex;margin-top:12px}}
+
+#quickForm{flex-wrap:wrap;align-items:center}#quickForm #quick{flex:1 1 200px;min-width:120px}
+#quickForm .quick-date{display:flex;flex-direction:column;gap:4px;flex:0 1 155px;margin:0;font-size:13px;color:#101a30;min-width:0}
+#quickForm .quick-date input{background:#fff;border:1px solid #68748b;border-radius:5px;padding:6px;color:#101a30;font-size:14px;width:100%;min-width:0}
+#quickForm .quick-add{padding:9px 12px;align-self:flex-end;white-space:nowrap}
+#quickDateHint{flex-basis:100%;color:#35415b;font-size:13px}
+@media(max-width:580px){#quickForm .quick-date{flex:1 1 120px}#quickForm #quick{flex-basis:calc(100% - 30px)}}

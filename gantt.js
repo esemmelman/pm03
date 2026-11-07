@@ -1,7 +1,7 @@
 const ganttDayMs=86400000;
 function dateDay(value){if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value)||value.slice(0,4)==='0000')return NaN;const date=new Date(value+'T00:00:00Z');return Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===value?date.getTime()/ganttDayMs:NaN}
 function taskDatesValid(start,end){if(start===''&&end==='')return true;return Number.isFinite(dateDay(start))&&Number.isFinite(dateDay(end))&&start<=end}
-function validateTaskDateInputs(){const start=$('#taskStart'),end=$('#taskEnd');start.setCustomValidity('');end.setCustomValidity('');if(taskDatesValid(start.value,end.value))return true;const field=!start.value?start:end;field.setCustomValidity(!start.value||!end.value?'Set both a start date and an end date, or clear both.':'End date must be on or after start date.');field.reportValidity();return false}
+function validateTaskDateInputs(start=$('#taskStart'),end=$('#taskEnd')){start.setCustomValidity('');end.setCustomValidity('');if(taskDatesValid(start.value,end.value))return true;const field=!start.value?start:end;field.setCustomValidity(!start.value||!end.value?'Set both a start date and an end date, or clear both.':'End date must be on or after start date.');field.reportValidity();return false}
 function clearTaskDateErrors(){ $('#taskStart').setCustomValidity('');$('#taskEnd').setCustomValidity(''); }
 function timelineDate(day){return new Date(day*ganttDayMs).toISOString().slice(0,10)}
 function timelineLabel(day){return new Date(day*ganttDayMs).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})}
