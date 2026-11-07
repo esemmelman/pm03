@@ -66,3 +66,20 @@ aside>#taskViewsToggle{color:#fff;width:100%;margin-top:20px;margin-bottom:4px;p
 #quickForm .quick-add{padding:9px 12px;align-self:flex-end;white-space:nowrap}
 #quickDateHint{flex-basis:100%;color:#35415b;font-size:13px}
 @media(max-width:580px){#quickForm .quick-date{flex:1 1 120px}#quickForm #quick{flex-basis:calc(100% - 30px)}}
+/* Calendar shared by project tasks and the live DayFlow feed. */
+#scheduleSection .schedule-layout{grid-template-columns:minmax(0,1fr) 265px;align-items:start}
+#scheduleSection .calendar-container{min-width:0}#scheduleSection .schedule-queue{background:#fff;color:#101a30;border:1px solid #68748b;padding:15px}#scheduleSection .schedule-queue p,#scheduleSection .schedule-candidate small{color:#35415b}
+.calendar-scroll{height:650px;max-height:75vh;overflow:auto;background:#fff;border:2px solid #101a30;border-radius:8px;scrollbar-gutter:stable}
+.calendar-grid{display:grid;grid-template-columns:58px repeat(var(--calendar-days),minmax(135px,1fr));min-width:calc(58px + var(--calendar-days)*135px);position:relative;align-items:stretch}
+.calendar-corner,.calendar-date{position:sticky;top:0;z-index:6;background:#edf1f9;border-bottom:1px solid #68748b;margin:0;padding:12px 5px;font-size:14px;text-align:center;color:#101a30}.calendar-date{border-left:1px solid #a4aec0}.calendar-date.current-day{background:#dce6ff;color:#132e80}
+.calendar-corner{left:0;z-index:8}.calendar-all-day-label{font-size:12px;padding:10px 4px;background:#edf1f9;position:sticky;left:0;z-index:4;color:#101a30}
+.calendar-all-day{padding:4px;min-height:80px;border-left:1px solid #a4aec0;border-bottom:2px solid #68748b;background:#fafbff}
+.all-day-drop{display:block;text-align:left;width:100%;padding:7px;border:1px dashed #68748b;border-radius:4px;color:#35415b;font-size:12px}
+.calendar-hours{background:#edf1f9;position:sticky;left:0;z-index:4}.calendar-hours>div{height:64px;border-top:1px solid #a4aec0;font-size:12px;text-align:center;padding-top:2px;color:#35415b}
+.calendar-time-column{position:relative;border-left:1px solid #a4aec0;min-width:0;height:1536px}
+.calendar-slot{display:block;width:100%;height:32px;padding:0;border-bottom:1px dotted #c3cbda;background:#fff}.calendar-slot:nth-child(even){border-bottom:1px solid #a4aec0}.calendar-slot:hover,.calendar-slot:focus-visible,.all-day-drop:hover,.drop-hover{background:#fff0a6!important;outline:2px solid #143ec7;outline-offset:-2px}
+.calendar-event{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;font-size:12px;line-height:1.25;border-radius:4px;border:1px solid #68748b;padding:3px 5px;overflow:hidden;overflow-wrap:anywhere;min-height:18px;margin:3px 0;color:#101a30;background:#fff5b8}.calendar-event strong{font-weight:600}.calendar-event small{font-size:11px}.calendar-time-column>.calendar-event{position:absolute;z-index:2;margin:0;box-shadow:0 1px 2px #101a3022}.calendar-event.dayflow-event{background:#dce6ff;border-color:#143ec7;color:#132e80;cursor:default}.calendar-event.local-event{cursor:grab}.calendar-event.local-event:active,.schedule-candidate[draggable]:active{cursor:grabbing}.schedule-candidate[draggable]{cursor:grab}
+#scheduleSection .schedule-candidate{gap:6px}#scheduleSection .schedule-candidate .outline-button{font-size:13px;padding:6px 9px}
+@media(max-width:1100px){#scheduleSection .schedule-layout{grid-template-columns:minmax(0,1fr)}#scheduleSection .schedule-queue{max-height:420px;overflow:auto}.calendar-scroll{height:600px}}
+
+.calendar-all-day{position:sticky;top:42px;z-index:5;max-height:160px;overflow-y:auto}.calendar-all-day-label{top:42px;z-index:7;border-bottom:2px solid #68748b}
