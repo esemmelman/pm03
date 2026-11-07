@@ -60,11 +60,13 @@ aside>#taskViewsToggle{color:#fff;width:100%;margin-top:20px;margin-bottom:4px;p
 .collapsible-tool{min-width:0}.collapsible-tool>section{margin-top:8px}
 @media(max-width:580px){aside>#taskViewsToggle{display:flex;margin-top:12px}}
 
-#quickForm{flex-wrap:wrap;align-items:center;padding:6px 8px;gap:6px}#quickForm #quick{flex:1 1 160px;min-width:100px}
-#quickForm .quick-date{display:flex;flex-direction:column;gap:2px;flex:0 1 140px;margin:0;font-size:12px;color:#101a30;min-width:0}
-#quickForm .quick-date input{background:#fff;border:1px solid #68748b;border-radius:5px;padding:4px;color:#101a30;font-size:14px;width:100%;min-width:0}
-#quickForm .quick-add{padding:7px 10px;align-self:flex-end;white-space:nowrap}
-@media(max-width:580px){#quickForm .quick-date{flex:1 1 120px}#quickForm #quick{flex-basis:calc(100% - 30px)}}
+#quickForm{flex-wrap:wrap;align-items:center;padding:6px 8px;gap:6px}#quickForm #quick{flex:1 1 160px;min-width:100px;padding:5px 0}
+#quickForm .quick-date-input{flex:0 1 145px;width:145px;min-width:0;background:#fff;color:#101a30;border:1px solid #68748b;border-radius:5px;padding:4px;font-size:14px}
+.quick-mic{display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #68748b;border-radius:5px;background:#fff;color:#101a30;padding:5px 8px}.quick-mic[aria-pressed="true"]{background:#a8241c;color:#fff;border-color:#a8241c}
+#captureStatus{flex-basis:100%;font-size:13px;color:#35415b;line-height:1.4}
+#syncStatus{font-size:12px;color:#35415b;max-width:200px}.conflict-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+@media(max-width:580px){#quickForm #quick{flex-basis:calc(100% - 30px)}#quickForm .quick-date-input{flex:1 1 100px;width:100px}.header-actions #syncStatus{flex-basis:100%;max-width:none}}
+
 /* Calendar shared by project tasks and the live DayFlow feed. */
 #scheduleSection .schedule-layout{grid-template-columns:minmax(0,1fr) 265px;align-items:start}
 #scheduleSection .calendar-container{min-width:0}#scheduleSection .schedule-queue{background:#fff;color:#101a30;border:1px solid #68748b;padding:15px}#scheduleSection .schedule-queue p,#scheduleSection .schedule-candidate small{color:#35415b}
@@ -82,3 +84,7 @@ aside>#taskViewsToggle{color:#fff;width:100%;margin-top:20px;margin-bottom:4px;p
 @media(max-width:1100px){#scheduleSection .schedule-layout{grid-template-columns:minmax(0,1fr)}#scheduleSection .schedule-queue{max-height:420px;overflow:auto}.calendar-scroll{height:600px}}
 
 .calendar-all-day{position:sticky;top:42px;z-index:5;max-height:160px;overflow-y:auto}.calendar-all-day-label{top:42px;z-index:7;border-bottom:2px solid #68748b}
+
+#quickForm .quick-save{padding:4px 6px;font-size:20px;line-height:1;color:#101a30;flex-shrink:0}#quickForm .quick-save:hover{background:#ffe34d;border-radius:4px}
+
+.task-panel-head .task-heading-search{flex-basis:450px}.sync-version-preview{white-space:pre-wrap;overflow-wrap:anywhere;max-height:250px;overflow:auto;font:inherit;font-size:14px;border:1px solid #68748b;border-radius:5px;padding:12px;background:#edf1f9;color:#101a30}@media(max-width:580px){.task-panel-head .task-heading-search{flex:1 1 100%;width:100%}.task-search-filters{width:100%}}

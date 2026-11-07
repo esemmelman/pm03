@@ -17,7 +17,7 @@ async function refreshDayflow(){
  })();dayflowLive.pending=request;try{return await request}finally{if(dayflowLive.pending===request)dayflowLive.pending=null}
 }
 function applyDayflowSession(session){
- const user=session?.user||null;if(user&&user.id===dayflowLive.user?.id)return;
+ const user=session?.user||null;if(typeof setWorkspaceUser==='function')setWorkspaceUser(user);if(user&&user.id===dayflowLive.user?.id)return;
  dayflowLive.generation++;dayflowLive.pending=null;dayflowLive.events=[];dayflowLive.lastLoaded=0;
  if(dayflowLive.channel){dayflowClient.removeChannel(dayflowLive.channel);dayflowLive.channel=null}
  dayflowLive.user=user;dayflowLive.status=user?'Loading DayFlow calendar…':'Connect DayFlow to see your live calendar.';paintDayflow();
@@ -27,7 +27,7 @@ function applyDayflowSession(session){
  refreshDayflow();
 }
 function openDayflowAccount(){
- if(dayflowLive.user){$('#dayflowLoginError').textContent='Connected as '+(dayflowLive.user.email||'DayFlow user')+'. To switch accounts, sign out below.';$('#dayflowCredentials').hidden=true;$('#dayflowSubmit').hidden=true;$('#dayflowSignOut').hidden=false}else{$('#dayflowLoginError').textContent=dayflowClient?'':'DayFlow connection could not start. Reload the page.';$('#dayflowCredentials').hidden=false;$('#dayflowSubmit').hidden=false;$('#dayflowSignOut').hidden=true}$('#dayflowPassword').value='';$('#dayflowDialog').showModal();
+ if(dayflowLive.user){$('#dayflowLoginError').textContent='Connected as '+(dayflowLive.user.email||'DayFlow user')+'. Your workspace syncs with this account.';$('#dayflowCredentials').hidden=true;$('#dayflowSubmit').hidden=true;$('#dayflowSignOut').hidden=false}else{$('#dayflowLoginError').textContent=dayflowClient?'':'DayFlow connection could not start. Reload the page.';$('#dayflowCredentials').hidden=false;$('#dayflowSubmit').hidden=false;$('#dayflowSignOut').hidden=true}$('#dayflowPassword').value='';$('#dayflowDialog').showModal();
 }
 // Auth callbacks defer database calls to avoid holding the auth client's lock.
 if(dayflowClient){dayflowClient.auth.onAuthStateChange((_event,session)=>setTimeout(()=>applyDayflowSession(session),0));dayflowClient.auth.getSession().then(({data,error})=>{if(error){dayflowLive.status='Could not restore DayFlow sign-in. Please connect again.';paintDayflow()}else applyDayflowSession(data.session)}).catch(()=>{dayflowLive.status='Could not connect to DayFlow. Please reload.';paintDayflow()})}else{dayflowLive.status='DayFlow connection could not start. Reload the page.';paintDayflow()}

@@ -1,0 +1,14 @@
+const {JSDOM}=require(process.env.SOLO_JSDOM||'jsdom'),fs=require('node:fs'),assert=require('node:assert/strict');
+const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'http://localhost',runScripts:'outside-only'}),w=dom.window;
+w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
+w.eval(['gantt.js','scheduler.js','vendor/chrono-en.min.js','app.js','tutorial.js','capture.js'].map(f=>fs.readFileSync(f,'utf8')).join('\n')+`\nwindow.captureTest={parse:parseQuickTask,apply:applyQuickTranscript};`);
+const ref=new Date(2026,10,7,12),p=w.captureTest.parse;
+let result=p('Prepare report from Monday to Friday',ref);assert.equal(result.title,'Prepare report');assert.equal(result.startDate,'2026-11-09');assert.equal(result.endDate,'2026-11-13');
+result=p('Call Alex tomorrow',ref);assert.equal(result.title,'Call Alex');assert.equal(result.startDate,'2026-11-08');assert.equal(result.endDate,'2026-11-08');
+result=p('Review proposal starting November 9 ending November 12',ref);assert.equal(result.title,'Review proposal');assert.equal(result.startDate,'2026-11-09');assert.equal(result.endDate,'2026-11-12');
+result=p('Meet Alex tomorrow from 2 pm to 3:15 pm',ref);assert.equal(result.fields.startTime,'14:00');assert.equal(result.fields.endTime,'15:15');
+result=p('Review proposal start date November 9 end date November 12',ref);assert.equal(result.title,'Review proposal');assert.equal(result.startDate,'2026-11-09');assert.equal(result.endDate,'2026-11-12');
+const $=s=>w.document.querySelector(s);assert(!$('.quick-add'));assert.equal($('#quick').getAttribute('placeholder'),null);assert.equal(w.document.querySelectorAll('#quickForm label').length,0);assert.equal($('#quickStart').getAttribute('aria-label'),'Start date');
+w.captureTest.apply('Prepare report from Monday to Friday');const title=$('#quick').value,start=$('#quickStart').value,end=$('#quickEnd').value;$('#quick').dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));const stored=JSON.parse(w.localStorage.getItem('solo-desk-v1'));assert(stored.tasks.some(t=>t.title===title&&t.startDate===start&&t.endDate===end),'Enter submits without button');
+$('#quickMic').click();assert($('#captureStatus').textContent.includes('unavailable'),'unsupported browser fallback');
+let recognition;w.SpeechRecognition=class{constructor(){recognition=this}start(){}stop(){this.onend()}abort(){}};$('#quickMic').click();recognition.onresult({results:[Object.assign([{transcript:'Write summary tomorrow'}],{isFinal:true})]});recognition.onend();assert.equal($('#quick').value,'Write summary');assert($('#captureStatus').textContent.includes('Review'));assert.equal($('#quickMic').getAttribute('aria-pressed'),'false');console.log('Capture passed: compact fields, natural dates/ranges/times, Enter submission, speech lifecycle, unsupported fallback');w.close();
