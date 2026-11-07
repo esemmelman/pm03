@@ -3,7 +3,7 @@ const dayflowLive={user:null,events:[],status:'Connecting to DayFlow…',generat
 window.dayflowConnection=dayflowLive;
 const dayflowSettings=window.DAYFLOW_SUPABASE;
 const dayflowClient=window.supabase&&dayflowSettings?window.supabase.createClient(dayflowSettings.url,dayflowSettings.publishableKey):null;
-function paintDayflow(){if(view==='Schedule'&&!calendarDragging)renderSchedule()}
+function paintDayflow(){if(view==='Schedule'&&!calendarDragging&&!document.documentElement.classList.contains('android-command-first'))renderSchedule();window.refreshAndroidHome?.()}
 async function refreshDayflow(){
  if(!dayflowClient||!dayflowLive.user){dayflowLive.status='Connect DayFlow to see your live calendar.';paintDayflow();return false}
  if(dayflowLive.pending)return dayflowLive.pending;

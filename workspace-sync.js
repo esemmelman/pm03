@@ -12,7 +12,7 @@ function storeWorkspace(content){
  localStorage.setItem(owner?workspaceCacheKey(owner):'solo-desk-v1',JSON.stringify(owner?{content,base:workspaceSync.base}:content));
  if(workspaceSync.ready&&workspaceSync.user&&!equalWorkspace(content,workspaceSync.base))queueWorkspaceSync();
 }
-function workspaceStatus(message){const status=document.getElementById('syncStatus');if(status)status.textContent=message;const side=document.getElementById('sidebarSyncStatus');if(side)side.textContent=message;const footer=document.getElementById('workspaceSaveStatus');if(footer)footer.textContent=message;const button=document.getElementById('accountButton');if(button)button.textContent=workspaceSync.user?'Account':'Sign in'}
+function workspaceStatus(message){const status=document.getElementById('syncStatus');if(status)status.textContent=message;const side=document.getElementById('sidebarSyncStatus');if(side)side.textContent=message;const footer=document.getElementById('workspaceSaveStatus');if(footer)footer.textContent=message;const button=document.getElementById('accountButton');if(button)button.textContent=workspaceSync.user?'Account':'Sign in';window.refreshAndroidHome?.()}
 function validWorkspace(value){
  if(!value||!Array.isArray(value.projects)||!Array.isArray(value.tasks)||!Array.isArray(value.sessions)||typeof value.scratch!=='string')return false;
  const projects=new Set();for(const p of value.projects){if(!p||typeof p.id!=='string'||projects.has(p.id)||typeof p.name!=='string'||typeof p.notes!=='string'||!/^#[0-9a-f]{6}$/i.test(p.color))return false;projects.add(p.id)}
