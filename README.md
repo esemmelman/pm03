@@ -73,3 +73,5 @@ On Android, startup opens a Type or speak field with a Speak button. Desktop and
 `qa-android.cjs` checks platform-specific startup, combined sources, filters, read-only queries, simulated speech, reviewed capture and account isolation. Chrome Android emulation verifies first-screen visibility, query rendering, Calendar navigation and phone layout; actual phone microphone hardware was not tested.
 
 Android Show me requests for 'the next N days' count today as day one: 'the next 5 days' includes today and the following four calendar days, for both DayFlow and scheduled project items. Numeric counts and common spoken counts such as five are supported.
+
+Published HTML uses content hashes on script and style URLs to avoid stale assets after a release. Android displays Version 2026.11.07.2 beside its account/sync controls for phone verification. Already open tabs still need a reload to load a new release.
