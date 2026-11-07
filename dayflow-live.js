@@ -1,4 +1,4 @@
-// Read-only connection: this app never writes to DayFlow's tasks table.
+// Live DayFlow calendar. Appointment writes are scoped in dayflow-editor.js.
 const dayflowLive={user:null,events:[],status:'Connecting to DayFlow…',generation:0,channel:null,pending:null,lastLoaded:0};
 const dayflowSettings=window.DAYFLOW_SUPABASE;
 const dayflowClient=window.supabase&&dayflowSettings?window.supabase.createClient(dayflowSettings.url,dayflowSettings.publishableKey):null;
@@ -20,7 +20,7 @@ function applyDayflowSession(session){
  const user=session?.user||null;if(typeof setWorkspaceUser==='function')setWorkspaceUser(user);if(user&&user.id===dayflowLive.user?.id)return;
  dayflowLive.generation++;dayflowLive.pending=null;dayflowLive.events=[];dayflowLive.lastLoaded=0;
  if(dayflowLive.channel){dayflowClient.removeChannel(dayflowLive.channel);dayflowLive.channel=null}
- dayflowLive.user=user;dayflowLive.status=user?'Loading DayFlow calendar…':'Connect DayFlow to see your live calendar.';paintDayflow();
+ dayflowLive.user=user;document.dispatchEvent(new CustomEvent('dayflow-account-change',{detail:{userId:user?.id||null}}));dayflowLive.status=user?'Loading DayFlow calendar…':'Connect DayFlow to see your live calendar.';paintDayflow();
  if(!user)return;
  const generation=dayflowLive.generation;
  dayflowLive.channel=dayflowClient.channel('pm03-dayflow-'+user.id).on('postgres_changes',{event:'*',schema:'public',table:'tasks',filter:`user_id=eq.${user.id}`},()=>refreshDayflow()).subscribe(status=>{if(generation!==dayflowLive.generation)return;if(status==='SUBSCRIBED')refreshDayflow();else if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status)){dayflowLive.status='DayFlow live connection interrupted. Retrying automatically; calendar also refreshes every 30 seconds.';paintDayflow()}});

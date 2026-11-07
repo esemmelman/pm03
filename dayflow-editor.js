@@ -1,0 +1,46 @@
+// Appointment edits use DayFlow's existing owner-scoped table and preserve reminder settings.
+let dayflowEditContext=null;
+function currentDayflowEditor(context){return dayflowEditContext===context&&dayflowLive.user?.id===context.owner&&dayflowLive.generation===context.generation}
+function dayflowEditorBusy(context,busy){context.busy=busy;if(!currentDayflowEditor(context))return;const dialog=$('#dayflowEditorDialog');dialog.dataset.busy=String(busy);$('#dayflowEditorFields').disabled=busy||context.loading;$('#dayflowItemSave').disabled=busy||context.loading;$('#dayflowItemDelete').disabled=busy||context.loading;$('#dayflowEditorClose').disabled=busy;$('#dayflowEditorCancel').disabled=busy}
+function updateDayflowTimeFields(){const allDay=$('#dayflowItemAllDay').checked;$('#dayflowTimeFields').hidden=allDay;$('#dayflowItemStart').disabled=allDay;$('#dayflowItemEnd').disabled=allDay;$('#dayflowItemStart').required=!allDay}
+function closeDayflowEditor(){dayflowEditContext=null;$('#dayflowEditorDialog').dataset.busy='false';$('#dayflowEditorDialog').close()}
+async function openDayflowEditor(id=null,defaults={}){
+ if(!dayflowClient||!dayflowLive.user){toast('Sign in to add or edit DayFlow appointments.');openDayflowAccount();return}
+ if(dayflowEditContext?.busy)return;
+ const context={id:id||uid(),isNew:!id,owner:dayflowLive.user.id,generation:dayflowLive.generation,original:null,loading:!!id,busy:false};dayflowEditContext=context;calendarSelection='';document.querySelectorAll('[data-sidebar-task]').forEach(button=>{button.classList.remove('selected-for-calendar');button.setAttribute('aria-pressed','false')});
+ $('#dayflowEditorTitle').textContent=id?'Edit DayFlow item':'New DayFlow item';$('#dayflowItemTitle').value='';$('#dayflowItemDate').value=defaults.date||scheduleDate;$('#dayflowItemAllDay').checked=defaults.minute==='all';const start=Number.isFinite(Number(defaults.minute))?Number(defaults.minute):9*60;$('#dayflowItemStart').value=clockOf(start);$('#dayflowItemEnd').value=clockOf(Math.min(1439,start+30));$('#dayflowItemNotes').value='';$('#dayflowItemDelete').hidden=!id;$('#dayflowEditorError').textContent=id?'Loading appointment…':'';updateDayflowTimeFields();dayflowEditorBusy(context,false);if(!$('#dayflowEditorDialog').open)$('#dayflowEditorDialog').showModal();
+ if(!id){$('#dayflowItemTitle').focus();return}
+ try{const {data:row,error}=await dayflowClient.from('tasks').select('id,title,date,start_time,end_time,notes,updated_at').eq('user_id',context.owner).eq('id',id).maybeSingle();if(!currentDayflowEditor(context))return;if(error)throw error;if(!row)throw Error('This appointment was deleted. Close the editor and refresh the calendar.');context.original=row;context.loading=false;$('#dayflowItemTitle').value=row.title;$('#dayflowItemDate').value=row.date||defaults.date||scheduleDate;$('#dayflowItemAllDay').checked=row.start_time===null;$('#dayflowItemStart').value=row.start_time?.slice(0,5)||'';$('#dayflowItemEnd').value=row.end_time?.slice(0,5)||'';$('#dayflowItemNotes').value=row.notes||'';$('#dayflowEditorError').textContent=row.end_time?.startsWith('24:00')?'This item ends at midnight. Leave end time blank to keep midnight.':'';updateDayflowTimeFields();dayflowEditorBusy(context,false);$('#dayflowItemTitle').focus();
+ }catch(error){if(currentDayflowEditor(context))$('#dayflowEditorError').textContent=error.message||'Could not load this appointment.'}
+}
+function dayflowEditFilters(query,context){query=query.eq('user_id',context.owner).eq('id',context.id);for(const key of ['title','date','start_time','end_time','notes']){const value=context.original[key];query=value==null?query.is(key,null):query.eq(key,value)}return query}
+async function refreshDayflowAfterWrite(context,values=null){
+ const pending=dayflowLive.pending;if(pending)await pending;if(dayflowLive.user?.id!==context.owner||dayflowLive.generation!==context.generation)return false;
+ const replacement=values?parseDayflow({format:'dayflow-backup',tasks:[{id:context.id,title:values.title,date:values.date,time:values.start_time?.slice(0,5)||null,endTime:values.end_time?.slice(0,5)||null}]}).events:[];
+ dayflowLive.events=[...dayflowLive.events.filter(item=>item.id!==context.id),...replacement];paintDayflow();return refreshDayflow();
+}
+function dayflowEditorValues(context){
+ const title=$('#dayflowItemTitle').value.trim(),date=$('#dayflowItemDate').value,allDay=$('#dayflowItemAllDay').checked,start=$('#dayflowItemStart').value,end=$('#dayflowItemEnd').value;
+ if(!title||title.length>500)throw Error('Enter a title of 1–500 characters.');if(!Number.isFinite(dateDay(date)))throw Error('Choose a valid date.');if(!allDay&&!Number.isFinite(minuteOf(start)))throw Error('Choose a start time or select All day.');
+ const midnight=!allDay&&!end&&context.original?.end_time?.startsWith('24:00');if(!allDay&&end&&(!Number.isFinite(minuteOf(end))||minuteOf(end)<=minuteOf(start)))throw Error('End time must be after start time.');
+ const preserveTime=(value,original)=>original&&value===original.slice(0,5)?original:value||null;
+ return {title,date,start_time:allDay?null:preserveTime(start,context.original?.start_time),end_time:allDay?null:midnight?'24:00':preserveTime(end,context.original?.end_time),notes:$('#dayflowItemNotes').value};
+}
+$('#dayflowItemAllDay').onchange=updateDayflowTimeFields;$('#dayflowEditorClose').onclick=closeDayflowEditor;$('#dayflowEditorCancel').onclick=closeDayflowEditor;
+$('#dayflowEditorDialog').addEventListener('cancel',event=>{if(dayflowEditContext?.busy)event.preventDefault()});$('#dayflowEditorDialog').addEventListener('close',()=>{if(!$('#dayflowEditorDialog').open)dayflowEditContext=null});
+$('#dayflowEditorForm').onsubmit=async event=>{
+ event.preventDefault();const context=dayflowEditContext;if(!context||context.busy||context.loading||!currentDayflowEditor(context))return;let values;try{values=dayflowEditorValues(context)}catch(error){$('#dayflowEditorError').textContent=error.message;return}dayflowEditorBusy(context,true);$('#dayflowEditorError').textContent='Saving…';
+ try{const query=context.isNew?dayflowClient.from('tasks').insert({id:context.id,user_id:context.owner,...values,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'}):dayflowEditFilters(dayflowClient.from('tasks').update(values),context);let result=await query.select('id').maybeSingle();if(!currentDayflowEditor(context))return;
+  if(context.isNew&&result.error?.code==='23505'){const existing=await dayflowClient.from('tasks').select('id,title,date,start_time,end_time,notes').eq('user_id',context.owner).eq('id',context.id).maybeSingle();if(!currentDayflowEditor(context))return;const time=t=>t?.slice(0,5)||null;if(!existing.error&&existing.data&&['title','date','notes'].every(k=>existing.data[k]===values[k])&&time(existing.data.start_time)===time(values.start_time)&&time(existing.data.end_time)===time(values.end_time))result={data:{id:context.id}}}
+  if(result.error)throw result.error;if(!result.data)throw Error('This appointment changed or was deleted in DayFlow. Reopen it to review the latest version.');closeDayflowEditor();const refreshed=await refreshDayflowAfterWrite(context,values);if(dayflowLive.user?.id===context.owner)toast(refreshed?'DayFlow appointment saved.':'Appointment saved. Refresh the calendar when connected.');
+ }catch(error){if(currentDayflowEditor(context))$('#dayflowEditorError').textContent=error.message||'Could not save the appointment. Your changes are still in the editor.'}finally{if(currentDayflowEditor(context))dayflowEditorBusy(context,false)}
+};
+$('#dayflowItemDelete').onclick=async()=>{
+ const context=dayflowEditContext;if(!context||context.isNew||context.busy||context.loading||!currentDayflowEditor(context))return;
+ const confirmed=await requestCalendarConfirmation('Delete DayFlow appointment?','Delete “'+context.original.title+'” on '+(context.original.date||'its scheduled date')+'? This removes it from DayFlow on all devices.','Yes, delete');if(!confirmed||!currentDayflowEditor(context))return;dayflowEditorBusy(context,true);$('#dayflowEditorError').textContent='Deleting…';
+ try{const result=await dayflowEditFilters(dayflowClient.from('tasks').delete(),context).select('id').maybeSingle();if(!currentDayflowEditor(context))return;if(result.error)throw result.error;if(!result.data){const latest=await dayflowClient.from('tasks').select('id').eq('user_id',context.owner).eq('id',context.id).maybeSingle();if(!currentDayflowEditor(context))return;if(latest.error)throw latest.error;if(latest.data)throw Error('This appointment changed in DayFlow. Reopen it before deleting.')}
+  closeDayflowEditor();const refreshed=await refreshDayflowAfterWrite(context);if(dayflowLive.user?.id===context.owner)toast(refreshed?'DayFlow appointment deleted.':'Appointment deleted. Refresh the calendar when connected.');
+ }catch(error){if(currentDayflowEditor(context))$('#dayflowEditorError').textContent=error.message||'Could not delete this appointment.'}finally{if(currentDayflowEditor(context))dayflowEditorBusy(context,false)}
+};
+
+document.addEventListener('dayflow-account-change',event=>{if(dayflowEditContext&&dayflowEditContext.owner!==event.detail.userId)closeDayflowEditor()});

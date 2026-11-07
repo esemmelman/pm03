@@ -14,7 +14,7 @@ assert.equal(w.document.querySelectorAll('.calendar-date').length,7);const hours
 const transfer={setData(){},effectAllowed:'',dropEffect:''},drag=new w.Event('dragstart',{bubbles:true});Object.defineProperty(drag,'dataTransfer',{value:transfer});$('[data-sidebar-task="drag-me"]').dispatchEvent(drag);
 const drop=new w.Event('drop',{bubbles:true,cancelable:true});Object.defineProperty(drop,'dataTransfer',{value:transfer});$('[data-drop-date="2026-11-07"][data-drop-minute="630"]').dispatchEvent(drop);
 assert.equal(task().startTime,'10:30');assert.equal(task().endTime,'11:15');assert(w.document.querySelector('#projects [data-sidebar-task="drag-me"]'),'sidebar task remains after drop');assert(!w.document.querySelector('.schedule-queue'));assert(w.document.querySelector('.calendar-hours').textContent.includes('1:00 PM'));assert(!w.document.querySelector('.calendar-hours').textContent.includes('13:00'));
-assert.equal(await w.calendarTest.place('drag-me','2026-11-07','540'),false,'reject DayFlow overlap');assert.equal(task().startTime,'10:30');
+const overlapRequest=w.calendarTest.place('drag-me','2026-11-07','540');assert.equal(w.document.activeElement,$('#calendarConfirmNo'));$('#calendarConfirmNo').click();assert.equal(await overlapRequest,false,'overlap declined by default');assert.equal(task().startTime,'10:30');
 assert.equal(await w.calendarTest.place('drag-me','2026-11-08','810'),true);assert.equal(task().endTime,'14:15','keep duration on move');
 assert.equal(await w.calendarTest.place('drag-me','2026-11-08','1410'),false,'reject day overflow');
 assert.equal(await w.calendarTest.place('day-plan','2026-11-09','all'),true);assert.equal(w.calendarTest.state().tasks[1].endDate,'2026-11-10','keep all-day span');

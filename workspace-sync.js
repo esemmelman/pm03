@@ -36,7 +36,7 @@ function describeWorkspace(value){return 'Projects: '+value.projects.map(p=>p.na
 function showWorkspaceConflict(remote){rememberWorkspaceRecovery(data,remote);document.getElementById('syncConflictDetails').textContent='THIS DEVICE\n'+describeWorkspace(data)+'\n\nCLOUD\n'+describeWorkspace(remote);workspaceSync.conflict={cloud:cloneWorkspace(remote)};workspaceStatus('Sync paused: resolve conflicting edits');const dialog=document.getElementById('syncConflictDialog');if(dialog&&!dialog.open)dialog.showModal()}
 function applyWorkspaceContent(next){const note=document.getElementById('note'),oldNote=data.projects.find(p=>p.id===project)?.notes;if(document.activeElement===note&&note.value===oldNote){const nextNote=next.projects.find(p=>p.id===project)?.notes;if(typeof nextNote==='string'&&nextNote!==note.value)note.value=nextNote}data=cloneWorkspace(next);if(project&&!data.projects.some(p=>p.id===project)){project=null;projectSection='tasks'}if(document.getElementById('scratch').value!==data.scratch)document.getElementById('scratch').value=data.scratch;render()}
 function queueWorkspaceSync(){if(!workspaceSync.user||!workspaceSync.ready||workspaceSync.conflict)return;clearTimeout(workspaceSync.timer);workspaceStatus('Saving…');workspaceSync.timer=setTimeout(()=>syncWorkspace(),500)}
-function workspaceEditorOpen(){return calendarDragging||!!document.querySelector('#taskDialog[open],#projectDialog[open],#deleteProjectDialog[open]')}
+function workspaceEditorOpen(){return calendarDragging||calendarPlacing||!!document.querySelector('#taskDialog[open],#projectDialog[open],#deleteProjectDialog[open],#dayflowEditorDialog[open],#calendarConfirmDialog[open]')}
 async function syncWorkspace(){
  if(!workspaceSync.user||!workspaceSync.ready||workspaceSync.conflict||workspaceEditorOpen())return false;if(workspaceSync.running)return workspaceSync.running;
  const epoch=workspaceSync.epoch,user=workspaceSync.user;
@@ -83,6 +83,6 @@ document.getElementById('syncExportConflict').onclick=()=>{const url=URL.createO
 setInterval(()=>{if(document.visibilityState!=='hidden')syncWorkspace()},20000);window.addEventListener('online',()=>syncWorkspace());document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncWorkspace()});
 window.addEventListener('storage',event=>{if(event.key===workspaceCacheKey(workspaceSync.user?.id))syncWorkspace()});
 
-document.addEventListener('close',event=>{if(['taskDialog','projectDialog','deleteProjectDialog'].includes(event.target.id))setTimeout(()=>syncWorkspace(),0)},true);
+document.addEventListener('close',event=>{if(['taskDialog','projectDialog','deleteProjectDialog','dayflowEditorDialog','calendarConfirmDialog'].includes(event.target.id))setTimeout(()=>syncWorkspace(),0)},true);
 
 document.getElementById('syncConflictDialog').addEventListener('cancel',event=>event.preventDefault());
