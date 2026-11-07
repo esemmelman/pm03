@@ -85,3 +85,5 @@ The Gantt chart now uses seven fixed daily columns, initially starting today, in
 Use No dates in inline sidebar capture, quick capture or the task editor to clear both task dates. Editor times are also cleared. Quick capture respects the explicit No dates choice even when the entered title contains a natural-language date/time; new captures still default to today. Undated tasks remain in task lists and the Gantt unscheduled section.
 
 Calendar startup now shows the Calendar, Tasks, Project notes and Gantt tabs above the calendar before any project is selected. Tasks and Gantt can be opened globally; Project notes is disabled until a project is selected. Android retains its Type or speak opening screen, with tabs available when Calendar is opened.
+
+Calendar event widths are calculated separately for each group of overlapping times. An isolated task fills the day cell even when other appointments overlap elsewhere that day. Tasks and DayFlow appointments that actually overlap continue to share lanes. qa-calendar-width.cjs covers independent overlap groups, touching endpoints and width recovery after moving a task.
