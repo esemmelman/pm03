@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'http://localhost',runScripts:'outside-only'}),w=dom.window;
 w.HTMLDialogElement.prototype.showModal=function(){this.open=true};
 w.HTMLDialogElement.prototype.close=function(){this.open=false};
-w.eval(fs.readFileSync('scheduler.js','utf8')+'\n'+fs.readFileSync('gantt.js','utf8')+'\n'+fs.readFileSync('app.js','utf8')+'\n'+fs.readFileSync('tutorial.js','utf8'));
+w.eval(fs.readFileSync('scheduler.js','utf8')+'\n'+fs.readFileSync('gantt.js','utf8')+'\n'+fs.readFileSync('app.js','utf8')+'\n'+fs.readFileSync('tutorial.js','utf8')+"\nwindow.clearGanttFixtureDates=()=>{data.tasks.forEach(task=>{task.startDate='';task.endDate=''});save();render()};");
 const $=s=>w.document.querySelector(s),assert=(ok,msg)=>{if(!ok)throw Error(msg)};
 assert(!$('#scheduleSection').hidden&&$('#taskSection').hidden,'opens directly to calendar');w.document.querySelector('[data-view="Today"]').click();
 assert(w.document.querySelectorAll('.task').length===5,'seed Today view');
@@ -82,6 +82,7 @@ $('#projectName').value='New project';$('#projectName').dispatchEvent(new w.Even
 $('#projectForm').dispatchEvent(new w.Event('submit',{cancelable:true}));
 stored=JSON.parse(w.localStorage.getItem('solo-desk-v1'));
 assert(stored.projects.some(p=>p.name==='New project'&&p.notes==='New notes')&&$('#title').textContent==='New project','create and select project');
+w.clearGanttFixtureDates();
 $('#ganttTab').click();assert(!$('#ganttSection').hidden&&$('#taskSection').hidden&&$('#projectNotes').hidden,'Gantt tab replaces other sections');
 assert($('#ganttSection').textContent.includes('No scheduled tasks yet'),'empty timeline');
 $('#newTask').click();$('#taskName').value='Carnival setup <test>';
@@ -117,7 +118,7 @@ async function checkBackupDates(){
  assert(w.document.querySelectorAll('.gantt-bar').length===2,'dated backup restores chart');
  const legacy=JSON.parse(JSON.stringify(datedBackup));for(const task of legacy.tasks){delete task.startDate;delete task.endDate}
  await importData(legacy);w.document.querySelector('[data-project-details="'+currentProject+'"]').click();$('#ganttTab').click();
- assert(!$('.gantt-bar')&&w.document.querySelectorAll('.unscheduled-task').length===2,'legacy backup imports as unscheduled');
+ assert(!$('.gantt-bar')&&w.document.querySelectorAll('.unscheduled-task').length===legacy.tasks.length,'legacy backup imports as unscheduled');
  assert(!w.taskDatesValid('2027-02-29','2027-03-01')&&w.taskDatesValid('2028-02-29','2028-02-29'),'leap date validation');
 }
 checkBackupDates().then(()=>{dom.window.close();console.log('PASS: task/project controls, tutorial, tabs, Gantt dates, editing, single-day/DST/leap ranges, long timeline, and dated/legacy backup import');}).catch(error=>{dom.window.close();console.error(error);process.exitCode=1});

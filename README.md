@@ -75,3 +75,5 @@ On Android, startup opens a Type or speak field with a Speak button. Desktop and
 Android Show me requests for 'the next N days' count today as day one: 'the next 5 days' includes today and the following four calendar days, for both DayFlow and scheduled project items. Numeric counts and common spoken counts such as five are supported.
 
 Published HTML uses content hashes on script and style URLs to avoid stale assets after a release. Android displays Version 2026.11.07.2 beside its account/sync controls for phone verification. Already open tabs still need a reload to load a new release.
+
+The Gantt chart shows all workspace tasks across every project, including unassigned tasks, regardless of the selected project. Titles include the project name; dated tasks share one timeline and undated tasks appear below it. Clicking a task edits that task while preserving its project assignment.

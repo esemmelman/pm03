@@ -8,6 +8,7 @@ data.dayflow=parseDayflow({format:'dayflow-backup',tasks:[{id:'reminder',title:'
 `);
 const $=s=>w.document.querySelector(s),task=()=>w.planningTest.state().tasks.find(t=>t.id==='moving');
 assert(!$('#projectTabs').hidden);assert.equal($('#calendarTab').getAttribute('aria-selected'),'true');$('#notesTab').click();assert(!$('#projectNotes').hidden);assert.equal($('#note').value,'Project context');$('#calendarTab').click();assert(!$('#scheduleSection').hidden);
+$('#ganttTab').click();assert.equal(w.document.querySelectorAll('.gantt-bar').length,3,'Gantt includes every project and unassigned tasks');assert($('[data-gantt-task="other"]').textContent.includes('Other project'));assert($('[data-gantt-task="unassigned"]').textContent.includes('Unassigned'));$('[data-gantt-task="other"]').click();assert.equal($('#taskProject').value,'q','cross-project Gantt edit preserves ownership');$('#taskDialog').close();$('#calendarTab').click();
 let card=$('[data-schedule-edit="moving"]');assert.equal(card.querySelector('strong').textContent,task().title+' (Client plan)');assert(card.title.includes(task().title+' (Client plan)'));assert(!card.querySelector('small'),'calendar task is one title line');
 const transfer={setData(){},effectAllowed:'',dropEffect:''};function dragEvent(type,y=0){const event=new w.MouseEvent(type,{bubbles:true,cancelable:true,clientY:y});Object.defineProperty(event,'dataTransfer',{value:transfer});return event}
 // A horizontal move must preserve the grabbed time, rather than add the grab offset.
