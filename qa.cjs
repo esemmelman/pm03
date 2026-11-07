@@ -6,7 +6,7 @@ w.HTMLDialogElement.prototype.showModal=function(){this.open=true};
 w.HTMLDialogElement.prototype.close=function(){this.open=false};
 w.eval(fs.readFileSync('scheduler.js','utf8')+'\n'+fs.readFileSync('gantt.js','utf8')+'\n'+fs.readFileSync('app.js','utf8')+'\n'+fs.readFileSync('tutorial.js','utf8')+"\nwindow.clearGanttFixtureDates=()=>{data.tasks.forEach(task=>{task.startDate='';task.endDate=''});save();render()};");
 const $=s=>w.document.querySelector(s),assert=(ok,msg)=>{if(!ok)throw Error(msg)};
-assert(!$('#scheduleSection').hidden&&$('#taskSection').hidden,'opens directly to calendar');w.document.querySelector('[data-view="Today"]').click();
+assert(!$('#scheduleSection').hidden&&$('#taskSection').hidden,'opens directly to calendar');assert(!$('#projectTabs').hidden,'startup tabs visible without a selected project');assert($('#calendarTab').getAttribute('aria-selected')==='true','Calendar tab selected at startup');assert($('#notesTab').disabled,'notes require a selected project');$('#ganttTab').click();assert(!$('#ganttSection').hidden,'global Gantt opens without a selected project');$('#calendarTab').click();assert(!$('#scheduleSection').hidden,'return to startup calendar');w.document.querySelector('[data-view="Today"]').click();
 assert(w.document.querySelectorAll('.task').length===5,'seed Today view');
 $('#quick').value='QA capture';$('#quickForm').dispatchEvent(new w.Event('submit',{cancelable:true}));
 assert(w.document.querySelectorAll('.task').length===6,'capture');
@@ -33,7 +33,7 @@ assert($('#notesTab').getAttribute('aria-selected')==='true','keyboard switches 
 w.document.querySelector('[data-project-details="p2"]').click();
 assert($('#projectNotes').hidden&&!$('#taskSection').hidden,'new project resets to tasks');
 w.document.querySelector('[data-view="Today"]').click();
-assert($('#projectTabs').hidden&&!$('#taskSection').hidden,'global task view hides project tabs');
+assert(!$('#projectTabs').hidden&&!$('#taskSection').hidden,'global task view keeps tabs available');
 $('#tutorialToggle').click();assert(!$('#tutorial').hidden,'tutorial opens');
 const before=JSON.parse(w.localStorage.getItem('solo-desk-v1')).tasks.length;
 $('#lessonAction').click();let stored=JSON.parse(w.localStorage.getItem('solo-desk-v1'));
@@ -66,7 +66,7 @@ $('#deleteProject').click();$('#deleteProjectForm').dispatchEvent(new w.Event('s
 stored=JSON.parse(w.localStorage.getItem('solo-desk-v1'));
 assert(!stored.projects.some(p=>p.id==='p1')&&stored.tasks.length===taskTotal,'project-only deletion');
 assert(retained.every(old=>stored.tasks.some(t=>t.id===old.id&&t.project===''&&t.done===old.done&&t.horizon===old.horizon)),'tasks preserved as unassigned');
-assert($('#projectActions').hidden&&$('#projectTabs').hidden,'deletion clears selected project');
+assert($('#projectActions').hidden&&!$('#projectTabs').hidden&&$('#notesTab').disabled,'deletion clears selected project while keeping tabs');
 w.document.querySelector('[data-project-details="school-carnival-example"]').click();
 const removedIds=stored.tasks.filter(t=>t.project==='school-carnival-example').map(t=>t.id);
 $('#focusTask').value=removedIds[0];$('#startTimer').click();
