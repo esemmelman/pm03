@@ -4,21 +4,22 @@ w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogE
 w.eval(['gantt.js','scheduler.js','app.js','tutorial.js'].map(f=>fs.readFileSync(f,'utf8')).join('\n')+`
 window.calendarTest={today:localDate(),state:()=>data,place:placeCalendarTask};
 data.tasks=[{id:'drag-me',title:'Write proposal',project:'p1',horizon:'Today',priority:'Medium',tags:[],notes:'',startDate:'2026-11-07',endDate:'2026-11-07',durationMinutes:45,done:false},{id:'day-plan',title:'Planning range',project:'p1',horizon:'Today',priority:'Low',tags:[],notes:'',startDate:'2026-11-07',endDate:'2026-11-08',done:false}];
-data.dayflow=parseDayflow({format:'dayflow-backup',tasks:[{id:'meeting',title:'DayFlow meeting',date:'2026-11-07',time:'09:00',endTime:'10:15'}]});scheduleDate='2026-11-07';view='Schedule';render();save();
+data.dayflow=parseDayflow({format:'dayflow-backup',tasks:[{id:'meeting',title:'DayFlow meeting',date:'2026-11-07',time:'09:00',endTime:'10:15'}]});scheduleDate='2026-11-07';view='Schedule';project='p1';expandedProjects.add('p1');render();save();
 `);
 const $=s=>w.document.querySelector(s),task=()=>w.calendarTest.state().tasks.find(t=>t.id==='drag-me');
+const projectButton=()=>w.document.querySelector('[data-project="p1"]');projectButton().click();assert.equal(projectButton().getAttribute('aria-expanded'),'false');assert(w.document.querySelector('#project-task-list-0').hidden);projectButton().click();assert.equal(projectButton().getAttribute('aria-expanded'),'true');assert(w.document.body.classList.contains('calendar-mode'));
 assert.equal($('#quickStart').value,w.calendarTest.today);assert.equal($('#quickEnd').value,w.calendarTest.today);
 assert.equal(w.document.querySelectorAll('.calendar-date').length,7);assert($('.dayflow-event').textContent.includes('DayFlow meeting'));
-const transfer={setData(){},effectAllowed:'',dropEffect:''},drag=new w.Event('dragstart',{bubbles:true});Object.defineProperty(drag,'dataTransfer',{value:transfer});$('[data-drag-task="drag-me"]').dispatchEvent(drag);
+const transfer={setData(){},effectAllowed:'',dropEffect:''},drag=new w.Event('dragstart',{bubbles:true});Object.defineProperty(drag,'dataTransfer',{value:transfer});$('[data-sidebar-task="drag-me"]').dispatchEvent(drag);
 const drop=new w.Event('drop',{bubbles:true,cancelable:true});Object.defineProperty(drop,'dataTransfer',{value:transfer});$('[data-drop-date="2026-11-07"][data-drop-minute="630"]').dispatchEvent(drop);
-assert.equal(task().startTime,'10:30');assert.equal(task().endTime,'11:15');
+assert.equal(task().startTime,'10:30');assert.equal(task().endTime,'11:15');assert(w.document.querySelector('#projects [data-sidebar-task="drag-me"]'),'sidebar task remains after drop');assert(!w.document.querySelector('.schedule-queue'));assert(w.document.querySelector('.calendar-hours').textContent.includes('1:00 PM'));assert(!w.document.querySelector('.calendar-hours').textContent.includes('13:00'));
 assert.equal(await w.calendarTest.place('drag-me','2026-11-07','540'),false,'reject DayFlow overlap');assert.equal(task().startTime,'10:30');
 assert.equal(await w.calendarTest.place('drag-me','2026-11-08','810'),true);assert.equal(task().endTime,'14:15','keep duration on move');
 assert.equal(await w.calendarTest.place('drag-me','2026-11-08','1410'),false,'reject day overflow');
 assert.equal(await w.calendarTest.place('day-plan','2026-11-09','all'),true);assert.equal(w.calendarTest.state().tasks[1].endDate,'2026-11-10','keep all-day span');
-$('[data-place="drag-me"]').click();
+$('[data-sidebar-task="drag-me"]').click();
 $('[data-drop-date="2026-11-10"][data-drop-minute="570"]').click();assert.equal(task().startTime,'09:30','click-to-place fallback');
-$('#newTask').click();assert.equal($('#taskStart').value,w.calendarTest.today);$('#taskDialog').close();
+$('#scheduleNew').click();assert.equal($('#taskStart').value,w.calendarTest.today);$('#taskDialog').close();
 $('#quick').value='Capture today';$('#quickForm').dispatchEvent(new w.Event('submit',{cancelable:true}));const captured=w.calendarTest.state().tasks.find(t=>t.title==='Capture today');assert.equal(captured.startDate,w.calendarTest.today);assert.equal($('#quickStart').value,w.calendarTest.today,'defaults reset after capture');
 const saved=JSON.parse(w.localStorage.getItem('solo-desk-v1'));assert.equal(saved.tasks.find(t=>t.id==='drag-me').startTime,'09:30');
-console.log('Calendar checks passed: today defaults, shared calendar, drag/drop, moving, conflicts, range preservation, click placement, persistence');w.close();})().catch(error=>{console.error(error);process.exit(1)});
+console.log('Calendar checks passed: today defaults, shared calendar, drag/drop, moving, conflicts, range preservation, click placement, project expansion/collapse, sidebar retention, AM/PM, persistence');w.close();})().catch(error=>{console.error(error);process.exit(1)});

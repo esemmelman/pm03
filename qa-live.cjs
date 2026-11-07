@@ -26,7 +26,7 @@ rows.push({id:'bad-date',title:'Unplaceable',date:'bad-date',start_time:null,end
 rows=Array.from({length:501},(_,i)=>({id:'page-'+i,title:'Paged item '+i,date:'2026-11-07',start_time:null,end_time:null}));assert.equal(await w.testLive.refresh(),true);assert.equal(w.testLive.events().length,501,'both calendar pages loaded');
 failure=true;assert.equal(await w.testLive.refresh(),false);assert(w.document.querySelector('#dayflowStatus').textContent.includes('could not refresh'));
 const before=JSON.parse(w.localStorage.getItem('solo-desk-v1')).tasks.filter(t=>t.startDate).length;
-w.document.querySelector('[data-fit]').click();await settle();assert.equal(JSON.parse(w.localStorage.getItem('solo-desk-v1')).tasks.filter(t=>t.startDate).length,before,'offline cannot schedule from stale calendar');
+w.document.querySelector('[data-project="p1"]').click();w.document.querySelector('[data-sidebar-task]').click();w.document.querySelector('[data-drop-date="2026-11-07"][data-drop-minute="660"]').click();await settle();assert.equal(JSON.parse(w.localStorage.getItem('solo-desk-v1')).tasks.filter(t=>t.startDate).length,before,'offline cannot schedule from stale calendar');
 failure=false;blocked=true;const pending=w.testLive.refresh();authChange('SIGNED_OUT',null);await settle();resolveQuery({data:[{id:'old',title:'Private old account',date:'2026-11-07',start_time:null,end_time:null}]});await pending;
 assert(!w.document.querySelector('#scheduleSection').textContent.includes('Private old account'),'late response discarded after sign out');
 assert(w.document.querySelector('#dayflowStatus').textContent.includes('Connect DayFlow'));

@@ -20,7 +20,7 @@ assert($('#startTimer').textContent.includes('Resume'),'timer pause');$('#resetT
 assert($('#timer').textContent==='25:00','timer reset');
 assert(!$('#stats')&&!$('.brand'),'summary cards and Solo brand removed');
 assert(w.document.querySelector('aside').firstElementChild.classList.contains('project-head'),'projects at top');
-w.document.querySelector('[data-project="p1"]').click();
+w.document.querySelector('[data-project-details="p1"]').click();
 assert(!$('#projectTabs').hidden&&$('#projectNotes').hidden&&!$('#taskSection').hidden,'project opens tasks');
 $('#notesTab').click();
 assert(!$('#projectNotes').hidden&&$('#taskSection').hidden,'notes replace task section');
@@ -29,7 +29,7 @@ assert(JSON.parse(w.localStorage.getItem('solo-desk-v1')).projects.find(p=>p.id=
 $('#tasksTab').click();assert($('#projectNotes').hidden&&!$('#taskSection').hidden,'return to tasks');
 $('#projectTabs').dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));
 assert($('#notesTab').getAttribute('aria-selected')==='true','keyboard switches tabs');
-w.document.querySelector('[data-project="p2"]').click();
+w.document.querySelector('[data-project-details="p2"]').click();
 assert($('#projectNotes').hidden&&!$('#taskSection').hidden,'new project resets to tasks');
 w.document.querySelector('[data-view="Today"]').click();
 assert($('#projectTabs').hidden&&!$('#taskSection').hidden,'global task view hides project tabs');
@@ -49,7 +49,7 @@ assert(w.document.querySelectorAll('.task').length===2,'volunteer filter results
 w.document.querySelector('[data-lesson="7"]').click();$('#lessonAction').click();
 assert($('#taskName').value==='Reconcile income, thank helpers and review','wrap-up editor');
 $('#taskDialog').close();$('#tutorialClose').click();assert($('#tutorial').hidden,'tutorial closes');
-w.document.querySelector('[data-project="p1"]').click();$('#editProject').click();
+w.document.querySelector('[data-project-details="p1"]').click();$('#editProject').click();
 $('#projectName').value='Renamed project';$('#projectDescription').value='Edited project notes';
 $('#projectForm').dispatchEvent(new w.Event('submit',{cancelable:true}));
 stored=JSON.parse(w.localStorage.getItem('solo-desk-v1'));
@@ -66,7 +66,7 @@ stored=JSON.parse(w.localStorage.getItem('solo-desk-v1'));
 assert(!stored.projects.some(p=>p.id==='p1')&&stored.tasks.length===taskTotal,'project-only deletion');
 assert(retained.every(old=>stored.tasks.some(t=>t.id===old.id&&t.project===''&&t.done===old.done&&t.horizon===old.horizon)),'tasks preserved as unassigned');
 assert($('#projectActions').hidden&&$('#projectTabs').hidden,'deletion clears selected project');
-w.document.querySelector('[data-project="school-carnival-example"]').click();
+w.document.querySelector('[data-project-details="school-carnival-example"]').click();
 const removedIds=stored.tasks.filter(t=>t.project==='school-carnival-example').map(t=>t.id);
 $('#focusTask').value=removedIds[0];$('#startTimer').click();
 $('#deleteProject').click();$('#deleteProjectTasks').checked=true;$('#deleteProjectTasks').dispatchEvent(new w.Event('change'));
@@ -112,10 +112,10 @@ async function checkBackupDates(){
  const beforeImport=w.localStorage.getItem('solo-desk-v1'),invalid=JSON.parse(beforeImport);
  invalid.tasks[0].startDate='2027-02-30';invalid.tasks[0].endDate='2027-03-01';
  await importData(invalid);assert(w.localStorage.getItem('solo-desk-v1')===beforeImport,'invalid backup date rejected without mutation');
- await importData(datedBackup);w.document.querySelector('[data-project="'+currentProject+'"]').click();$('#ganttTab').click();
+ await importData(datedBackup);w.document.querySelector('[data-project-details="'+currentProject+'"]').click();$('#ganttTab').click();
  assert(w.document.querySelectorAll('.gantt-bar').length===2,'dated backup restores chart');
  const legacy=JSON.parse(JSON.stringify(datedBackup));for(const task of legacy.tasks){delete task.startDate;delete task.endDate}
- await importData(legacy);w.document.querySelector('[data-project="'+currentProject+'"]').click();$('#ganttTab').click();
+ await importData(legacy);w.document.querySelector('[data-project-details="'+currentProject+'"]').click();$('#ganttTab').click();
  assert(!$('.gantt-bar')&&w.document.querySelectorAll('.unscheduled-task').length===2,'legacy backup imports as unscheduled');
  assert(!w.taskDatesValid('2027-02-29','2027-03-01')&&w.taskDatesValid('2028-02-29','2028-02-29'),'leap date validation');
 }
