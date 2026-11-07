@@ -12,8 +12,8 @@ async function refreshDayflow(){
   while(true){const {data:batch,error}=await dayflowClient.from('tasks').select('id,title,date,start_time,end_time').eq('user_id',user.id).order('id').range(page*500,page*500+499);if(error)throw error;rows.push(...batch);if(batch.length<500)break;page++}
   if(generation!==dayflowLive.generation)return false;
   const snapshot=parseDayflow({format:'dayflow-backup',tasks:rows.map(t=>({id:t.id,title:t.title,date:t.date,time:t.start_time?.slice(0,5)||null,endTime:t.end_time?.slice(0,5)||null}))});
-  dayflowLive.events=snapshot.events;dayflowLive.lastLoaded=Date.now();dayflowLive.status=`DayFlow connected · ${user.email||'Signed in'} · ${snapshot.events.length} dated items · Updated ${new Date().toLocaleTimeString()}`;paintDayflow();return true;
- }catch(error){if(generation===dayflowLive.generation){dayflowLive.status='DayFlow could not refresh. Displayed items may be out of date. Check your connection and try Refresh calendar.';paintDayflow()}return false}
+  dayflowLive.events=snapshot.events;dayflowLive.lastLoaded=Date.now();dayflowLive.status=`DayFlow connected · ${user.email||'Signed in'} · ${snapshot.events.length} dated items · Updated ${new Date().toLocaleTimeString()}${snapshot.adjustedCount?' · '+snapshot.adjustedCount+' end/start times need checking in DayFlow (shown with a reserved time).':''}${snapshot.skippedCount?' · '+snapshot.skippedCount+' items could not be placed because their dates are invalid. Fix them in DayFlow before using Find a slot.':''}`;paintDayflow();return snapshot.skippedCount===0;
+ }catch(error){if(generation===dayflowLive.generation){dayflowLive.status='DayFlow could not refresh'+(error.message?': '+error.message:'.')+' Displayed items may be out of date. Try Refresh calendar or sign in again.';paintDayflow()}return false}
  })();dayflowLive.pending=request;try{return await request}finally{if(dayflowLive.pending===request)dayflowLive.pending=null}
 }
 function applyDayflowSession(session){
