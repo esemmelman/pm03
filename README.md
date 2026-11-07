@@ -47,3 +47,6 @@ Workspace sync uses private owner-only RLS policies, Supabase Realtime and a 20-
 
 
 The **All day** label under Time is a toggle, initially collapsed. Expand it to see day-level tasks, all-day appointments and the **+ Day plan** targets. “Day plan” means assigning a task to that date without a time; it does not create a separate task by itself. The toggle keeps its state while navigating or refreshing the calendar during the session. DayFlow appointment blocks show their title and time without a repeated source label.
+
+
+The calendar sidebar is wider (340px on desktop, 280px on medium screens and 176px on phones). The timed grid shows 5:00 AM through the 11:00 PM boundary, omitting overnight rows. Appointments crossing a boundary are clipped to the visible portion while keeping their original times; entirely overnight items remain saved and continue to reserve their actual time.
