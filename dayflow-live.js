@@ -1,5 +1,6 @@
 // Live DayFlow calendar. Appointment writes are scoped in dayflow-editor.js.
 const dayflowLive={user:null,events:[],status:'Connecting to DayFlow…',generation:0,channel:null,pending:null,lastLoaded:0};
+window.dayflowConnection=dayflowLive;
 const dayflowSettings=window.DAYFLOW_SUPABASE;
 const dayflowClient=window.supabase&&dayflowSettings?window.supabase.createClient(dayflowSettings.url,dayflowSettings.publishableKey):null;
 function paintDayflow(){if(view==='Schedule'&&!calendarDragging)renderSchedule()}

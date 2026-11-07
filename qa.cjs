@@ -6,6 +6,7 @@ w.HTMLDialogElement.prototype.showModal=function(){this.open=true};
 w.HTMLDialogElement.prototype.close=function(){this.open=false};
 w.eval(fs.readFileSync('scheduler.js','utf8')+'\n'+fs.readFileSync('gantt.js','utf8')+'\n'+fs.readFileSync('app.js','utf8')+'\n'+fs.readFileSync('tutorial.js','utf8'));
 const $=s=>w.document.querySelector(s),assert=(ok,msg)=>{if(!ok)throw Error(msg)};
+assert(!$('#scheduleSection').hidden&&$('#taskSection').hidden,'opens directly to calendar');w.document.querySelector('[data-view="Today"]').click();
 assert(w.document.querySelectorAll('.task').length===5,'seed Today view');
 $('#quick').value='QA capture';$('#quickForm').dispatchEvent(new w.Event('submit',{cancelable:true}));
 assert(w.document.querySelectorAll('.task').length===6,'capture');

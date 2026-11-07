@@ -115,3 +115,5 @@ body.calendar-mode{--calendar-sidebar:340px;overflow:hidden}.calendar-mode main>
 @media(max-width:580px){.calendar-mode .calendar-grid[data-days="1"]{grid-template-columns:60px minmax(100px,1fr)32px;min-width:192px}}
 
 .calendar-corner{display:flex;align-items:center;justify-content:center;gap:2px;padding:6px 2px}#calendarPreviousDates{padding:2px;font-size:22px;line-height:1;color:#132e80}#calendarPreviousDates:hover{background:#dce6ff}
+
+.task.unassigned-task .task-name,.calendar-event.unassigned-task{color:#b42318;font-weight:700}
