@@ -113,3 +113,5 @@ body.calendar-mode{--calendar-sidebar:340px;overflow:hidden}.calendar-mode main>
 #calendarConfirmMessage{white-space:pre-line;line-height:1.5;color:#101a30;max-height:45vh;overflow:auto}#calendarConfirmNo:focus{outline:3px solid #143ec7;outline-offset:2px}#dayflowEditorDialog{max-height:90vh;overflow:auto}#dayflowEditorFields{border:0;padding:0;margin:0;min-width:0}.dayflow-all-day-option{display:flex;align-items:center;gap:8px}.dayflow-all-day-option input{width:18px;height:18px;margin:0}#dayflowEditorError{font-size:14px;color:#a8241c;line-height:1.4}#dayflowEditorForm .dialog-footer{flex-wrap:wrap;gap:8px}#dayflowEditorForm button:disabled{opacity:.55;cursor:wait}
 
 @media(max-width:580px){.calendar-mode .calendar-grid[data-days="1"]{grid-template-columns:60px minmax(100px,1fr)32px;min-width:192px}}
+
+.calendar-corner{display:flex;align-items:center;justify-content:center;gap:2px;padding:6px 2px}#calendarPreviousDates{padding:2px;font-size:22px;line-height:1;color:#132e80}#calendarPreviousDates:hover{background:#dce6ff}
