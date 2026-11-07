@@ -1,0 +1,21 @@
+const {JSDOM}=require(process.env.SOLO_JSDOM||'jsdom');
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'http://localhost',runScripts:'outside-only'}),w=dom.window;
+w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
+w.eval(['gantt.js','scheduler.js','app.js','tutorial.js'].map(f=>fs.readFileSync(f,'utf8')).join('\n')+`
+const snapshot=parseDayflow({format:'dayflow-backup',tasks:[{id:'a',title:'Appointment',date:'2026-11-7',time:'09:00',endTime:'10:15'}]});
+if(snapshot.events[0].date!=='2026-11-07')throw Error('Date normalization');
+data.dayflow=snapshot;scheduleDate='2026-11-07';view='Schedule';render();
+if(firstSlot(dayEntries(scheduleDate),30,540,1020)!==615)throw Error('Busy appointment skipped');
+if(firstSlot([{start:0,end:1440}],30,540,1020)!==null)throw Error('All day blocks');
+if(scheduleFieldsValid({startDate:'2026-11-07',endDate:'2026-11-07',startTime:'10:00',endTime:'09:00'}))throw Error('Reject reversed time');
+`);
+const $=s=>w.document.querySelector(s);
+assert.equal($('#scheduleSection').hidden,false);
+$('[data-fit]').click();
+const stored=JSON.parse(w.localStorage.getItem('solo-desk-v1'));
+const scheduled=stored.tasks.find(t=>t.startTime==='10:15');assert(scheduled,'scheduled after appointment');assert.equal(scheduled.endTime,'10:45');
+$('[data-schedule-edit="'+scheduled.id+'"]').click();assert.equal($('#taskTime').value,'10:15');
+$('#taskTime').value='11:07';$('#taskEndTime').value='11:39';$('#taskForm').dispatchEvent(new w.Event('submit',{cancelable:true}));
+assert.equal(JSON.parse(w.localStorage.getItem('solo-desk-v1')).tasks.find(t=>t.id===scheduled.id).startTime,'11:07');
+assert.equal(stored.dayflow.events.length,1);console.log('Schedule checks passed');w.close();

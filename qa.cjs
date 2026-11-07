@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'http://localhost',runScripts:'outside-only'}),w=dom.window;
 w.HTMLDialogElement.prototype.showModal=function(){this.open=true};
 w.HTMLDialogElement.prototype.close=function(){this.open=false};
-w.eval(fs.readFileSync('gantt.js','utf8')+'\n'+fs.readFileSync('app.js','utf8')+'\n'+fs.readFileSync('tutorial.js','utf8'));
+w.eval(fs.readFileSync('scheduler.js','utf8')+'\n'+fs.readFileSync('gantt.js','utf8')+'\n'+fs.readFileSync('app.js','utf8')+'\n'+fs.readFileSync('tutorial.js','utf8'));
 const $=s=>w.document.querySelector(s),assert=(ok,msg)=>{if(!ok)throw Error(msg)};
 assert(w.document.querySelectorAll('.task').length===5,'seed Today view');
 $('#quick').value='QA capture';$('#quickForm').dispatchEvent(new w.Event('submit',{cancelable:true}));
