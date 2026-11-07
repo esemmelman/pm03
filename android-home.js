@@ -15,8 +15,11 @@ function parseAndroidShow(command,now=new Date()){
  const source=matchedProject||withoutProject||explicitProject&&!explicitBoth||unscheduled||completed||open||priority?'project':explicitBoth?'both':explicitDayflow?'dayflow':'both';
  if(!matchedProject&&/\bprojects?\b/i.test(original)&&!/\b(?:tasks?|items?|work|calendar|schedule|appointments?|events?)\b/i.test(original)&&!withoutProject)return {kind:'projects',source:'project',projectId:null,terms:[]};
  let range=null,explicitDate=false;
- const week=text.match(/\b(this week|next week|next seven days|next 7 days)\b/i),month=text.match(/\b(this month|next month)\b/i),allDates=text.match(/\b(all dates|all time|any day|all days)\b/i);
- if(week){const monday=dateDay(today)-(now.getDay()+6)%7,start=/next (?:seven|7)/i.test(week[0])?dateDay(today):monday+(/next week/i.test(week[0])?7:0);range={start:timelineDate(start),end:timelineDate(start+6)};text=text.replace(week[0],' ');explicitDate=true}
+ const dayCounts={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30};
+ const nextDays=text.match(/\bnext\s+(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty)\s+days?\b/i);
+ const week=text.match(/\b(this week|next week)\b/i),month=text.match(/\b(this month|next month)\b/i),allDates=text.match(/\b(all dates|all time|any day|all days)\b/i);
+ if(nextDays){const count=dayCounts[nextDays[1].toLowerCase()]||Number(nextDays[1]);if(!Number.isSafeInteger(count)||count<1||count>365000)throw Error('Use a positive number of days within 1,000 years.');range={start:today,end:timelineDate(dateDay(today)+count-1)};text=text.replace(nextDays[0],' ');explicitDate=true}
+ else if(week){const monday=dateDay(today)-(now.getDay()+6)%7,start=monday+(/next week/i.test(week[0])?7:0);range={start:timelineDate(start),end:timelineDate(start+6)};text=text.replace(week[0],' ');explicitDate=true}
  else if(month){const offset=/next/i.test(month[0])?1:0;range={start:captureDate(new Date(now.getFullYear(),now.getMonth()+offset,1)),end:captureDate(new Date(now.getFullYear(),now.getMonth()+offset+1,0))};text=text.replace(month[0],' ');explicitDate=true}
  else if(allDates){text=text.replace(allDates[0],' ');explicitDate=true}
  else if(/\bupcoming\b/i.test(text)){range={start:today,end:'9999-12-31'};text=text.replace(/\bupcoming\b/ig,' ');explicitDate=true}
