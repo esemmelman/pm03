@@ -116,4 +116,6 @@ body.calendar-mode{--calendar-sidebar:340px;overflow:hidden}.calendar-mode main>
 
 .calendar-corner{display:flex;align-items:center;justify-content:center;gap:2px;padding:6px 2px}#calendarPreviousDates{padding:2px;font-size:22px;line-height:1;color:#132e80}#calendarPreviousDates:hover{background:#dce6ff}
 
-.task.unassigned-task .task-name,.calendar-event.unassigned-task{color:#b42318;font-weight:700}
+.task.is-unscheduled .task-name{color:#b42318;font-weight:700}
+
+.sidebar-task.is-unscheduled{color:#ff8a80}.sidebar-task.is-unscheduled.selected-for-calendar{color:#b42318}
