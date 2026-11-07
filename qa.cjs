@@ -91,6 +91,7 @@ $('#taskForm').dispatchEvent(new w.Event('submit',{cancelable:true}));
 assert($('#taskDialog').open&&!JSON.parse(w.localStorage.getItem('solo-desk-v1')).tasks.some(t=>t.title==='Carnival setup <test>'),'reject reversed dates');
 $('#taskEnd').value='';$('#taskEnd').dispatchEvent(new w.Event('input'));$('#taskForm').dispatchEvent(new w.Event('submit',{cancelable:true}));
 assert($('#taskDialog').open,'reject partial date range');
+$('#ganttStartDate').value='2027-03-13';$('#ganttStartDate').dispatchEvent(new w.Event('change'));
 $('#taskEnd').value='2027-03-15';$('#taskEnd').dispatchEvent(new w.Event('input'));$('#taskForm').dispatchEvent(new w.Event('submit',{cancelable:true}));
 assert(!$('#taskDialog').open&&$('.gantt-bar').dataset.duration==='3','inclusive dates across daylight-saving weekend');
 assert($('.gantt-task-label').textContent.includes('Carnival setup <test>')&&!$('#ganttSection test'),'chart escapes task titles');
