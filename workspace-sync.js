@@ -15,13 +15,14 @@ function storeWorkspace(content){
 function workspaceStatus(message){const status=document.getElementById('syncStatus');if(status)status.textContent=message;const side=document.getElementById('sidebarSyncStatus');if(side)side.textContent=message;const footer=document.getElementById('workspaceSaveStatus');if(footer)footer.textContent=message;const button=document.getElementById('accountButton');if(button)button.textContent=workspaceSync.user?'Account':'Sign in';window.refreshAndroidHome?.()}
 function validWorkspace(value){
  if(!value||!Array.isArray(value.projects)||!Array.isArray(value.tasks)||!Array.isArray(value.sessions)||typeof value.scratch!=='string')return false;
+ if(window.validateWorkspaceExtras&&!window.validateWorkspaceExtras(value))return false;
  const projects=new Set();for(const p of value.projects){if(!p||typeof p.id!=='string'||projects.has(p.id)||typeof p.name!=='string'||typeof p.notes!=='string'||!/^#[0-9a-f]{6}$/i.test(p.color))return false;projects.add(p.id)}
  const tasks=new Set();for(const t of value.tasks){if(!t||typeof t.id!=='string'||tasks.has(t.id)||typeof t.title!=='string'||typeof t.notes!=='string'||typeof t.project!=='string'||!Array.isArray(t.tags)||!t.tags.every(tag=>typeof tag==='string')||typeof t.done!=='boolean'||!['Today','This week','Backlog','Inbox'].includes(t.horizon)||!['High','Medium','Low'].includes(t.priority)||!taskDatesValid(t.startDate??'',t.endDate??'')||!scheduleFieldsValid(t))return false;tasks.add(t.id)}
  return value.sessions.every(s=>s&&typeof s.id==='string'&&typeof s.project==='string'&&Number.isFinite(s.minutes)&&s.minutes>=0);
 }
 function mergeWorkspaceValue(base,local,remote,path=''){
  if(equalWorkspace(local,remote))return cloneWorkspace(local);if(equalWorkspace(local,base))return cloneWorkspace(remote);if(equalWorkspace(remote,base))return cloneWorkspace(local);
- if(['projects','tasks','sessions'].includes(path)&&Array.isArray(local)&&Array.isArray(remote)){
+ if((['projects','tasks','sessions','resources'].includes(path)||path.endsWith('.comments'))&&Array.isArray(local)&&Array.isArray(remote)){
   const before=new Map((base||[]).map(item=>[item.id,item])),a=new Map(local.map(item=>[item.id,item])),b=new Map(remote.map(item=>[item.id,item])),ids=[...new Set([...remote.map(x=>x.id),...local.map(x=>x.id),...before.keys()])];
   return ids.map(id=>mergeWorkspaceValue(before.get(id),a.get(id),b.get(id),path+'.'+id)).filter(item=>item!==undefined);
  }
@@ -30,13 +31,13 @@ function mergeWorkspaceValue(base,local,remote,path=''){
  }
  throw Error('Conflicting edits: '+path);
 }
-function mergeInitialWorkspace(local,remote){const merged=cloneWorkspace(remote);for(const key of ['projects','tasks','sessions']){const ids=new Set(remote[key].map(item=>item.id));merged[key]=[...remote[key],...local[key].filter(item=>!ids.has(item.id))]}if(!remote.scratch)merged.scratch=local.scratch;for(const k of Object.keys(local))if(!(k in merged)&&!['__proto__','constructor','prototype'].includes(k))merged[k]=cloneWorkspace(local[k]);return merged}
+function mergeInitialWorkspace(local,remote){const merged=cloneWorkspace(remote);for(const key of ['projects','tasks','sessions','resources']){if(!(key in local)&&!(key in remote))continue;const ids=new Set((remote[key]||[]).map(item=>item.id));merged[key]=[...(remote[key]||[]),...(local[key]||[]).filter(item=>!ids.has(item.id))]}if(!remote.scratch)merged.scratch=local.scratch;for(const k of Object.keys(local))if(!(k in merged)&&!['__proto__','constructor','prototype'].includes(k))merged[k]=cloneWorkspace(local[k]);return merged}
 function rememberWorkspaceRecovery(local,remote){try{const id=workspaceSync.user?.id||'guest',key='solo-recovery:'+id,list=readWorkspaceJSON(key)||[];list.unshift({at:new Date().toISOString(),local:cloneWorkspace(local),cloud:cloneWorkspace(remote)});localStorage.setItem(key,JSON.stringify(list.slice(0,5)))}catch{}}
-function describeWorkspace(value){return 'Projects: '+value.projects.map(p=>p.name).join(', ')+'\n'+value.tasks.map(t=>'• '+t.title+(t.done?' (complete)':'')+' | '+(t.startDate||'No dates')+' → '+(t.endDate||'')+' '+(t.startTime||'')+' '+(t.endTime||'')+(t.notes?'\n  '+t.notes:'')).join('\n')+'\nScratchpad: '+value.scratch}
+function describeWorkspace(value){return 'Projects: '+value.projects.map(p=>p.name).join(', ')+'\n'+value.tasks.map(t=>'• '+t.title+(t.done?' (complete)':'')+' | '+(t.startDate||'No dates')+' → '+(t.endDate||'')+' '+(t.startTime||'')+' '+(t.endTime||'')+(t.notes?'\n  '+t.notes:'')).join('\n')+'\nScratchpad: '+value.scratch+(window.describeWorkspaceExtras?window.describeWorkspaceExtras(value):'')}
 function showWorkspaceConflict(remote){rememberWorkspaceRecovery(data,remote);document.getElementById('syncConflictDetails').textContent='THIS DEVICE\n'+describeWorkspace(data)+'\n\nCLOUD\n'+describeWorkspace(remote);workspaceSync.conflict={cloud:cloneWorkspace(remote)};workspaceStatus('Sync paused: resolve conflicting edits');const dialog=document.getElementById('syncConflictDialog');if(dialog&&!dialog.open)dialog.showModal()}
 function applyWorkspaceContent(next){const note=document.getElementById('note'),oldNote=data.projects.find(p=>p.id===project)?.notes;if(document.activeElement===note&&note.value===oldNote){const nextNote=next.projects.find(p=>p.id===project)?.notes;if(typeof nextNote==='string'&&nextNote!==note.value)note.value=nextNote}data=cloneWorkspace(next);if(project&&!data.projects.some(p=>p.id===project)){project=null;projectSection='tasks'}if(document.getElementById('scratch').value!==data.scratch)document.getElementById('scratch').value=data.scratch;render()}
 function queueWorkspaceSync(){if(!workspaceSync.user||!workspaceSync.ready||workspaceSync.conflict)return;clearTimeout(workspaceSync.timer);workspaceStatus('Saving…');workspaceSync.timer=setTimeout(()=>syncWorkspace(),500)}
-function workspaceEditorOpen(){return calendarDragging||calendarPlacing||!!document.querySelector('#taskDialog[open],#projectDialog[open],#deleteProjectDialog[open],#dayflowEditorDialog[open],#calendarConfirmDialog[open]')}
+function workspaceEditorOpen(){return !!document.querySelector('#resourcesSection:not([hidden]) #resourceForm[data-dirty="true"]')||calendarDragging||calendarPlacing||!!document.querySelector('#taskDialog[open],#projectDialog[open],#deleteProjectDialog[open],#dayflowEditorDialog[open],#calendarConfirmDialog[open]')}
 async function syncWorkspace(){
  if(!workspaceSync.user||!workspaceSync.ready||workspaceSync.conflict||workspaceEditorOpen())return false;if(workspaceSync.running)return workspaceSync.running;
  const epoch=workspaceSync.epoch,user=workspaceSync.user;
@@ -47,7 +48,7 @@ async function syncWorkspace(){
    const local=cloneWorkspace(data),remote=row?.content||emptyWorkspace();let merged;
    try{merged=workspaceSync.base?mergeWorkspaceValue(workspaceSync.base,local,remote):mergeInitialWorkspace(local,remote)}catch{showWorkspaceConflict(remote);return false}
    // An edited item on another device can refer to a project deleted here.
-   const projectIds=new Set(merged.projects.map(p=>p.id));for(const t of merged.tasks)if(t.project&&!projectIds.has(t.project))t.project='';
+   const projectIds=new Set(merged.projects.map(p=>p.id));for(const t of [...merged.tasks,...(merged.resources||[])])if(t.project&&!projectIds.has(t.project))t.project='';
    if(!validWorkspace(merged))throw Error('Workspace validation failed; local changes were kept.');
    if(!row||!equalWorkspace(merged,remote)){
     const write=row?dayflowClient.from('pm03_workspaces').update({content:merged,revision:row.revision+1}).eq('user_id',user.id).eq('revision',row.revision):dayflowClient.from('pm03_workspaces').insert({user_id:user.id,content:merged,revision:1});

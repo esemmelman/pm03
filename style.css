@@ -8,7 +8,7 @@
 /* Bold, compact workspace with saturated mint, teal and warm accents. */
 :root{--green:#086b58;--line:#b8d9ca;background:#d5efdf;color:#173e34}
 body{background:linear-gradient(135deg,#cef0da 0%,#e0f4d0 50%,#c9eae6 100%);min-height:100vh}
-body,body *{font-weight:700!important}
+body,body *:not(.comment-editor):not(.comment-editor *){font-weight:700!important}
 input::placeholder,textarea::placeholder{font-weight:700;color:#607a6b;opacity:1}
 aside{background:#a8ddbd;border-color:#7fc6a0;padding-top:24px;overflow-y:auto}
 .brand{padding-bottom:26px;color:#104c3d}.brand-dot{color:#08765a}.logo{background:#086b58}

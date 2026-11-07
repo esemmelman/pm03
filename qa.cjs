@@ -106,7 +106,7 @@ $('.gantt-bar').click();$('#taskStart').value='';$('#taskEnd').value='';$('#task
 assert(w.document.querySelectorAll('.gantt-bar').length===1&&$('.unscheduled-task'),'clear dates moves task to unscheduled');
 $('.unscheduled-task').click();$('#taskStart').value='2027-01-01';$('#taskEnd').value='2040-12-31';$('#taskForm').dispatchEvent(new w.Event('submit',{cancelable:true}));
 assert(w.document.querySelectorAll('.gantt-tick').length<20&&!$('#ganttSection').innerHTML.includes('NaN'),'long timelines remain bounded');
-$('#projectTabs').dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));assert($('#calendarTab').getAttribute('aria-selected')==='true','tab arrows wrap from Gantt to Calendar');
+$('#projectTabs').dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));assert($('#resourcesTab').getAttribute('aria-selected')==='true','Resources follows Gantt');$('#projectTabs').dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));assert($('#calendarTab').getAttribute('aria-selected')==='true','tab arrows wrap from Resources to Calendar');
 const currentProject=w.document.querySelector('.project-item.active').dataset.project;
 datedBackup=JSON.parse(w.localStorage.getItem('solo-desk-v1'));
 async function checkBackupDates(){
