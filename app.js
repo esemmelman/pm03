@@ -7,7 +7,7 @@ function toast(msg){$('#toast').textContent=msg;$('#toast').style.display='block
 function save(){try{typeof storeWorkspace==='function'?storeWorkspace(data):localStorage.setItem(key,JSON.stringify(data))}catch{toast('Storage is full or unavailable. Export a backup to keep your work.')}}
 function projectOf(id){return data.projects.find(p=>p.id===id)}
 function projectAliasesValid(aliases){return aliases===undefined||Array.isArray(aliases)&&aliases.every(alias=>typeof alias==='string'&&!!alias.trim()&&!/[\r\n]/.test(alias))}
-function projectSpellings(p){return p?[p.name,...(Array.isArray(p.aliases)?p.aliases:[])].filter(name=>typeof name==='string'&&name.trim()):[]}
+function projectSpellings(p){if(!p)return [];const names=[p.name,...(Array.isArray(p.aliases)?p.aliases:[])].filter(name=>typeof name==='string'&&name.trim()),words=p.name.trim().split(/\s+/);if(words.length>1)for(const alias of names.slice(1))if(!/\s/.test(alias.trim())&&!words.some(word=>spellingKey(word)===spellingKey(alias)))names.push(alias.trim()+' '+words.slice(1).join(' '));return [...new Set(names)]}
 function spellingKey(text){return text.trim().replace(/\s+/g,' ').toLocaleLowerCase()}
 function parseProjectAliases(text,name){const seen=new Set([spellingKey(name)]);return text.split(/\r?\n/).map(line=>line.trim().replace(/\s+/g,' ')).filter(line=>{const key=spellingKey(line);if(!key||seen.has(key))return false;seen.add(key);return true})}
 function projectSpellingRegex(name,flags='iu'){const escaped=name.trim().split(/\s+/).map(word=>word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('\\s+');return new RegExp('(^|[^\\p{L}\\p{N}_])('+escaped+')(?=$|[^\\p{L}\\p{N}_])',flags)}
