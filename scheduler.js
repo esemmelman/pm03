@@ -7,7 +7,7 @@ const clockOf=m=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).pad
 function scheduleFieldsValid(t){const a=t.startTime||'',b=t.endTime||'';return (t.durationMinutes===undefined||Number.isInteger(t.durationMinutes)&&t.durationMinutes>0&&t.durationMinutes<=1440)&&(!a&&!b||Number.isFinite(minuteOf(a))&&Number.isFinite(minuteOf(b))&&minuteOf(a)<minuteOf(b)&&!!t.startDate&&t.startDate===t.endDate)}
 function validateScheduleInputs(){const t={startTime:$('#taskTime').value,endTime:$('#taskEndTime').value,startDate:$('#taskStart').value,endDate:$('#taskEnd').value,durationMinutes:Number($('#taskDuration').value)};if(scheduleFieldsValid(t))return true;toast('Use both times, with end after start, on a single date. Estimate must be 1–1440 minutes.');return false}
 const dayflowEndMinute=t=>t==='24:00'?1440:minuteOf(t);
-function validDayflowSnapshot(s){return s&&typeof s.importedAt==='string'&&Array.isArray(s.events)&&s.events.every(e=>typeof e.id==='string'&&typeof e.title==='string'&&Number.isFinite(dateDay(e.date))&&(!e.time&&!e.endTime||Number.isFinite(minuteOf(e.time))&&Number.isFinite(dayflowEndMinute(e.endTime))&&dayflowEndMinute(e.endTime)>minuteOf(e.time)))}
+function validDayflowSnapshot(s){return s&&typeof s.importedAt==='string'&&Array.isArray(s.events)&&s.events.every(e=>typeof e.id==='string'&&typeof e.title==='string'&&(e.notes===undefined||typeof e.notes==='string')&&Number.isFinite(dateDay(e.date))&&(!e.time&&!e.endTime||Number.isFinite(minuteOf(e.time))&&Number.isFinite(dayflowEndMinute(e.endTime))&&dayflowEndMinute(e.endTime)>minuteOf(e.time)))}
 function parseDayflow(raw){
  if(raw?.format!=='dayflow-backup'||!Array.isArray(raw.tasks))throw Error('Choose a DayFlow JSON backup.');
  const events=[];let adjustedCount=0,skippedCount=0;
@@ -15,13 +15,14 @@ function parseDayflow(raw){
   if(!t||typeof t.title!=='string'||t.id==null){skippedCount++;continue}if(!t.date)continue;
   const parts=String(t.date).split('-'),date=parts.map((v,i)=>String(v).padStart(i===0?4:2,'0')).join('-');
   if(parts.length!==3||!Number.isFinite(dateDay(date))){skippedCount++;continue}
+  const details=typeof t.notes==='string'&&t.notes?{notes:t.notes}:{};
   const time=t.time==null?'':String(t.time);let endTime='',note='';
-  if(!time){events.push({id:String(t.id),title:t.title,date,time:'',endTime:''});continue}
+  if(!time){events.push({id:String(t.id),title:t.title,...details,date,time:'',endTime:''});continue}
   const start=minuteOf(time);
-  if(!Number.isFinite(start)){adjustedCount++;events.push({id:String(t.id),title:t.title,date,time:'',endTime:'',note:'Check start time in DayFlow; reserving this day.',blocksDay:true});continue}
+  if(!Number.isFinite(start)){adjustedCount++;events.push({id:String(t.id),title:t.title,...details,date,time:'',endTime:'',note:'Check start time in DayFlow; reserving this day.',blocksDay:true});continue}
   const end=t.endTime?dayflowEndMinute(String(t.endTime)):NaN;
   if(!Number.isFinite(end)||end<=start){const assumedEnd=Math.min(1440,start+60);endTime=clockOf(assumedEnd);if(t.endTime){adjustedCount++;note='Check end time in DayFlow; '+(assumedEnd-start===60?'1 hour reserved.':'reserved until midnight.')}}else endTime=String(t.endTime);
-  events.push({id:String(t.id),title:t.title,date,time,endTime,...(note?{note}:{})});
+  events.push({id:String(t.id),title:t.title,...details,date,time,endTime,...(note?{note}:{})});
  }
  return {importedAt:new Date().toISOString(),events,adjustedCount,skippedCount};
 }
