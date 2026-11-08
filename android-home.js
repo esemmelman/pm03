@@ -62,9 +62,21 @@ function renderAndroidHome(){
  if(query.kind==='saved')return;
  if(query.source!=='project'){const connection=window.dayflowConnection;if(!connection?.user)androidStatus(query.source==='dayflow'?'Sign in to see live DayFlow items.':'Sign in to include live DayFlow items. Showing matching project tasks on this device.');else if(!connection.lastLoaded||!connection.status.startsWith('DayFlow connected'))androidStatus('DayFlow could not fully refresh. These results may be incomplete or out of date.');else androidStatus(query.source==='dayflow'?'Showing matching DayFlow items.':'Showing your matching DayFlow items and project tasks.')}else androidStatus('Showing matching project tasks.');
 }
+function parseAndroidTaskCapture(command){
+ let text=command.trim(),projectId=null;
+ const assignment=text.match(/\s+under\s+(?:(?:the\s+)?project\s+|the\s+)?(.+)$/i);
+ if(assignment){
+  const matched=matchProjectReference(assignment[1]);
+  if(!matched){if(/^(?:please\s+)?add\b/i.test(text))throw Error('Project not found. Use its saved name or another spelling from project properties.')}else{
+   projectId=matched.id;const remaining=stripProjectReferences(assignment[1],matched).replace(/\bproject\b/gi,' ').replace(/^[\s,.;]+|[\s,.;]+$/g,'');text=text.slice(0,assignment.index)+(remaining?' '+remaining:'');
+  }
+ }
+ text=text.replace(/^(?:please\s+)?add\s+(?:(?:(?:a|an|the)\s+)?task\s+(?:to\s+)?)?/i,'');
+ return {...parseQuickTask(text),projectId};
+}
 async function runAndroidCommand(command=$('#androidCommand').value){
  if(!androidAssistant.enabled)return;const text=command.trim();if(!text){androidStatus('Type a request or tap Speak.');return}$('#androidCommand').value=text;let query;try{query=parseAndroidShow(text)}catch(error){androidAssistant.query=null;$('#androidResults').innerHTML='';androidStatus(error.message);return}
- if(!query){if(/^(?:please\s+)?show\b/i.test(text)){androidStatus('Start a list request with “Show me”, for example “Show me all of my tasks”.');return}try{const parsed=parseQuickTask(text);androidAssistant.pendingCapture={ids:new Set(data.tasks.map(t=>t.id)),owner:window.dayflowConnection?.user?.id||null};openTask();$('#taskName').value=parsed.title;if(parsed.startDate){$('#taskStart').value=parsed.startDate;$('#taskEnd').value=parsed.endDate}if(parsed.fields.startTime){$('#taskTime').value=parsed.fields.startTime;$('#taskEndTime').value=parsed.fields.endTime;$('#taskDuration').value=parsed.fields.durationMinutes}androidStatus('Review the task and dates, then choose Save task.')}catch(error){androidStatus(error.message)}return}
+ if(!query){if(/^(?:please\s+)?show\b/i.test(text)){androidStatus('Start a list request with “Show me”, for example “Show me all of my tasks”.');return}try{const parsed=parseAndroidTaskCapture(text);androidAssistant.pendingCapture={ids:new Set(data.tasks.map(t=>t.id)),owner:window.dayflowConnection?.user?.id||null};openTask();$('#taskName').value=parsed.title;if(parsed.projectId!==null)$('#taskProject').value=parsed.projectId;if(parsed.startDate){$('#taskStart').value=parsed.startDate;$('#taskEnd').value=parsed.endDate}if(parsed.fields.startTime){$('#taskTime').value=parsed.fields.startTime;$('#taskEndTime').value=parsed.fields.endTime;$('#taskDuration').value=parsed.fields.durationMinutes}androidStatus('Review the task'+(parsed.projectId!==null?' in '+projectOf(parsed.projectId).name:'')+' and dates, then choose Save task.')}catch(error){androidStatus(error.message)}return}
  androidAssistant.command=text;androidAssistant.query=query;androidAssistant.limit=50;androidAssistant.loading=true;const request=++androidAssistant.request,owner=window.dayflowConnection?.user?.id||null;$('#androidResults').innerHTML='';$('#androidResults').setAttribute('aria-busy','true');androidStatus('Loading your items…');$('#androidCommand').blur();
  await Promise.allSettled([query.source!=='dayflow'&&typeof syncWorkspace==='function'?syncWorkspace():Promise.resolve(),query.source!=='project'&&window.dayflowConnection?.user?refreshDayflow():Promise.resolve()]);
  if(request!==androidAssistant.request||owner!==(window.dayflowConnection?.user?.id||null)){if(request===androidAssistant.request)androidAssistant.loading=false;return}try{androidAssistant.query=parseAndroidShow(text)}catch(error){androidAssistant.query=null;androidStatus(error.message)}androidAssistant.loading=false;$('#androidResults').setAttribute('aria-busy','false');renderAndroidHome();
