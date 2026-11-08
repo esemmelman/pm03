@@ -9,6 +9,12 @@ function parseAndroidShow(command,now=new Date()){
  const matchedProject=matchProjectReference(text);
  let projectId=matchedProject?.id??null;if(matchedProject)text=stripProjectReferences(text,matchedProject);
  const withoutProject=/\b(?:without|no)\s+(?:a\s+)?project\b/i.test(text);if(withoutProject){projectId='';text=text.replace(/\b(?:without|no)\s+(?:a\s+)?project\b/ig,' ')}
+
+ if(/\b(?:resources?|links?)\b/i.test(text)){
+  const ignored=new Set('show me all of my the for from in on under project projects resource resources link links please items a an without no'.split(' ')),terms=(text.toLowerCase().match(/[\p{L}\p{N}_-]+/gu)||[]).filter(word=>!ignored.has(word));
+  if(projectId===null&&/\bprojects?\b/i.test(text)&&terms.length)throw Error('Project not found. Use its saved name or another spelling from project properties.');
+  return {kind:'resources',source:'project',projectId,projectName:matchedProject?.name||'',terms};
+ }
  text=text.replace(/\bnot\s+(?:done|completed|finished)\b/gi,'pending').replace(/\b(?:not\s+scheduled|without\s+(?:a\s+)?date|not\s+(?:on|in)\s+(?:the\s+)?calendar)\b/gi,'unscheduled');if(matchedProject)text=text.replace(/\bassigned\s+to\b/gi,'for');
  const unscheduled=/\b(?:unscheduled|undated|unplanned|unassigned|red)\b/i.test(text),completed=/\b(?:completed|complete|done|finished)\b/i.test(text),open=/\b(?:open|pending|unfinished|uncompleted)\b/i.test(text),priority=/\b(?:high\s+priority|urgent)\b/i.test(text)?'High':/\bmedium\s+priority\b/i.test(text)?'Medium':/\blow\s+priority\b/i.test(text)?'Low':'';
  if(explicitDayflow&&(unscheduled||completed||open||priority))throw Error('Those filters are available for project tasks. Try “Show me DayFlow today” or “Show me unscheduled project tasks”.');
@@ -45,6 +51,12 @@ function renderAndroidHome(){
  if(!document.documentElement.classList.contains('android-command-first')||androidAssistant.loading||!androidAssistant.query)return;
  const query=androidAssistant.query,results=$('#androidResults');
  if(query.kind==='projects'){results.innerHTML='<h2>Projects</h2>'+data.projects.map(p=>`<button type="button" class="android-result" data-android-project="${esc(p.id)}"><strong>${esc(p.name)}</strong><span>${data.tasks.filter(t=>t.project===p.id&&!t.done).length} open tasks</span></button>`).join('');if(!data.projects.length)results.innerHTML+='<p>No projects yet.</p>';return}
+
+ if(query.kind==='resources'){
+  const resources=(data.resources||[]).filter(r=>(query.projectId===null||r.project===query.projectId)&&query.terms.every(term=>[r.title,r.url,...projectSpellings(projectOf(r.project))].join(' ').toLowerCase().includes(term))),shown=resources.slice(0,androidAssistant.limit);
+  results.innerHTML='<h2>'+esc(query.projectName?query.projectName+' · Resources':query.projectId===''?'Resources · No project':'Resources')+'</h2><p class="android-result-count">'+resources.length+' resource'+(resources.length===1?'':'s')+(resources.length>shown.length?' · Showing '+shown.length:'')+'</p>'+shown.map(r=>{const url=typeof resourceURL==='function'?resourceURL(r.url):null;return url?'<a class="android-result" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer"><strong>'+esc(r.title||r.url)+'</strong><span>'+esc(r.url)+'</span><small>'+esc(projectOf(r.project)?.name||'No project')+'</small></a>':''}).join('')+(resources.length?'':'<p>No saved resources for '+esc(query.projectName||'this request')+'.</p>')+(resources.length>shown.length?'<button type="button" id="androidMore">Show 50 more</button>':'');
+  if($('#androidMore'))$('#androidMore').onclick=()=>{androidAssistant.limit+=50;renderAndroidHome()};androidStatus('Showing matching saved resources.');return;
+ }
  const items=androidItems(query),shown=items.slice(0,androidAssistant.limit);results.innerHTML=`<h2>${esc(androidQueryHeading(query))}</h2><p class="android-result-count">${items.length} item${items.length===1?'':'s'}${items.length>shown.length?' · Showing '+shown.length:''}</p>${shown.map(androidResultHTML).join('')||'<p>No matching items. Try another date, a project name, or “Show me unscheduled tasks”.</p>'}${items.length>shown.length?'<button type="button" id="androidMore">Show 50 more</button>':''}`;
  if($('#androidMore'))$('#androidMore').onclick=()=>{androidAssistant.limit+=50;renderAndroidHome()};
  if(query.kind==='saved')return;
