@@ -144,3 +144,4 @@ body.calendar-mode{--calendar-sidebar:340px;overflow:hidden}.calendar-mode main>
 #ganttScale{min-height:38px;border:1px solid #68748b;border-radius:5px;background:#fff;color:#101a30;padding:5px 8px;font-size:14px}
 .gantt-weekly{min-width:1000px}.gantt-monthly{min-width:900px}
 @media(max-width:580px){.gantt-date-controls{flex-wrap:wrap}.gantt-scale-label{flex-basis:100%;justify-content:center}.gantt-navigation{align-items:center}}
+.calendar-create-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}.calendar-create-options button{padding:16px 12px;min-height:56px;overflow-wrap:anywhere}#calendarCreateDialog{max-width:520px}#calendarCreateDescription{line-height:1.5}@media(max-width:580px){.calendar-create-options{grid-template-columns:1fr}}
