@@ -72,7 +72,7 @@ function parseAndroidTaskCapture(command){
   }
  }
  text=text.replace(/^(?:please\s+)?add\s+(?:(?:(?:a|an|the)\s+)?task\s+(?:to\s+)?)?/i,'');
- return {...parseQuickTask(text),projectId};
+ const parsed=parseQuickTask(text);return {...parsed,title:capitalizeTaskTitle(parsed.title),projectId};
 }
 async function runAndroidCommand(command=$('#androidCommand').value){
  if(!androidAssistant.enabled)return;const text=command.trim();if(!text){androidStatus('Type a request or tap Speak.');return}$('#androidCommand').value=text;let query;try{query=parseAndroidShow(text)}catch(error){androidAssistant.query=null;$('#androidResults').innerHTML='';androidStatus(error.message);return}
